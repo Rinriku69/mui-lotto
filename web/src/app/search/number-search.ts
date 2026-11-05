@@ -1,13 +1,29 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormField } from '@angular/forms/signals';
 import { LotteryData } from '../lottery/lottery-data';
-import { PRIZES, PRIZE_LABEL, WinEntry } from '../lottery/lottery.model';
-import { Matcher, SPACE, SearchMode, buildMatcher, enumerate } from '../lottery/number-pattern';
+import { PRIZES, PRIZE_LABEL, SPECIAL_DIGITS, SPECIAL_KINDS, SPECIAL_LABEL } from '../lottery/lottery.model';
+import { Matcher, SearchMode, buildMatcher, matchShare } from '../lottery/number-pattern';
 
-interface PrizeStat {
-  prize: number;
+/** Which tab the inspector serves. The query itself is shared (LotteryData.searchQuery). */
+export type SearchScope = 'main' | 'special';
+
+/** One row of the bullet chart: a prize (1–5) or a special kind (front3/last3/last2). */
+interface Group {
+  id: string;
   label: string;
+  digits: number;
+  /** how many numbers of this group are in the selected range */
+  count: number;
+}
+
+interface Hit {
+  date: string;
+  group: string;
+  number: string;
+}
+
+interface GroupStat extends Group {
   hits: number;
   expected: number;
   ratio: number | null;
@@ -21,6 +37,13 @@ const MAX_LIST = 120;
 const RATIO_MAX = 1.6;
 const num = new Intl.NumberFormat('en-US');
 
+const ALL_MODES: { value: SearchMode; label: string; main: string; special: string }[] = [
+  { value: 'anywhere', label: 'ANY', main: 'ตรงไหนก็ได้ · 59 → 159302, 845902', special: 'ตรงไหนก็ได้ · 61 → 612, 361, 61' },
+  { value: 'suffix', label: 'SUFFIX', main: 'เลขท้าย · 59 → xxxx59', special: 'เลขท้าย · 61 → x61, 61' },
+  { value: 'prefix', label: 'PREFIX', main: 'เลขหน้า · 59 → 59xxxx', special: 'เลขหน้า · 61 → 61x, 61' },
+  { value: 'position', label: 'POS', main: 'ตรงตำแหน่ง · x = หลักไหนก็ได้ เช่น x4xx99', special: '' },
+];
+
 @Component({
   selector: 'app-number-search',
   imports: [FormField, DecimalPipe],
@@ -32,33 +55,47 @@ export class NumberSearch {
   private readonly data = inject(LotteryData);
   protected readonly searchForm = this.data.searchForm;
 
-  readonly modes: { value: SearchMode; label: string; hint: string }[] = [
-    { value: 'anywhere', label: 'ANY', hint: 'ตรงไหนก็ได้ · 59 → 159302, 845902' },
-    { value: 'suffix', label: 'SUFFIX', hint: 'เลขท้าย · 59 → xxxx59' },
-    { value: 'prefix', label: 'PREFIX', hint: 'เลขหน้า · 59 → 59xxxx' },
-    { value: 'position', label: 'POS', hint: 'ตรงตำแหน่ง · x = หลักไหนก็ได้ เช่น x4xx99' },
-  ];
-  readonly examples = [
-    { mode: 'suffix' as const, text: '61' },
-    { mode: 'anywhere' as const, text: '888' },
-    { mode: 'position' as const, text: 'x4xx99' },
-  ];
+  readonly scope = input<SearchScope>('main');
+  private readonly special = computed(() => this.scope() === 'special');
+
+  /** POS mode needs 6-digit tickets, so the special tab doesn't offer it. */
+  readonly modes = computed(() => ALL_MODES.filter((m) => !this.special() || m.value !== 'position'));
+  readonly examples = computed(() =>
+    this.special()
+      ? [
+          { mode: 'suffix' as const, text: '61' },
+          { mode: 'anywhere' as const, text: '99' },
+          { mode: 'prefix' as const, text: '5' },
+        ]
+      : [
+          { mode: 'suffix' as const, text: '61' },
+          { mode: 'anywhere' as const, text: '888' },
+          { mode: 'position' as const, text: 'x4xx99' },
+        ],
+  );
   readonly tickPct = (1 / RATIO_MAX) * 100;
 
   readonly expanded = signal(false);
 
   readonly query = this.data.searchQuery;
-  readonly hint = computed(() => this.modes.find((m) => m.value === this.query().mode)!.hint);
+  readonly hint = computed(() => {
+    const m = ALL_MODES.find((x) => x.value === this.query().mode)!;
+    return this.special() ? m.special : m.main;
+  });
 
-  /** Ghost "xxxx" in front of a suffix query shows which positions are free. */
+  /** Ghost "x" in front of a suffix query shows which positions are free. */
   readonly ghost = computed(() => {
     const { mode, text } = this.query();
-    const free = Math.max(0, 6 - text.trim().length);
+    const free = Math.max(0, (this.special() ? 3 : 6) - text.trim().length);
     if (!text.trim() || mode === 'position' || mode === 'anywhere') return { before: '', after: '' };
     return mode === 'suffix' ? { before: 'x'.repeat(free), after: '' } : { before: '', after: 'x'.repeat(free) };
   });
 
-  readonly matcher = computed<Matcher | string | null>(() => buildMatcher(this.query().mode, this.query().text));
+  readonly matcher = computed<Matcher | string | null>(() => {
+    const q = this.query();
+    if (this.special() && q.mode === 'position') return 'โหมด POS ใช้กับรางวัลที่ 1–5 เท่านั้น เลือก ANY / SUFFIX / PREFIX';
+    return buildMatcher(q.mode, q.text);
+  });
   readonly error = computed(() => {
     const m = this.matcher();
     return typeof m === 'string' ? m : null;
@@ -68,35 +105,35 @@ export class NumberSearch {
     return m && typeof m !== 'string' ? m : null;
   });
 
-  /** How many of the 1M possible tickets match -> chance a random ticket matches. */
-  readonly spaceShare = computed(() => {
-    const m = this.valid();
-    return m ? enumerate(m.key, m.test).length / SPACE : 0;
-  });
-
-  readonly hits = computed<WinEntry[]>(() => {
-    const m = this.valid();
-    return m ? this.data.entries().filter((e) => m.test(e.number)) : [];
-  });
-
-  readonly stats = computed<PrizeStat[]>(() => {
+  private readonly groups = computed<Group[]>(() => {
+    if (this.special()) {
+      const byKind = this.data.specialByKind();
+      return SPECIAL_KINDS.map((k) => ({ id: k, label: SPECIAL_LABEL[k], digits: SPECIAL_DIGITS[k], count: byKind[k].length }));
+    }
     const byPrize = this.data.numbersByPrize();
-    const share = this.spaceShare();
-    // Map as a counter: prize -> hits, filled in one pass over the hits.
-    const hitCount = new Map<number, number>();
-    for (const h of this.hits()) hitCount.set(h.prize, (hitCount.get(h.prize) ?? 0) + 1);
-    return PRIZES.map((prize) => {
-      const hits = hitCount.get(prize) ?? 0;
-      const expected = byPrize[prize].length * share;
+    return PRIZES.map((p) => ({ id: String(p), label: PRIZE_LABEL[p], digits: 6, count: byPrize[p].length }));
+  });
+  private readonly labelOf = computed(() => new Map(this.groups().map((g) => [g.id, g.label])));
+
+  readonly hits = computed<Hit[]>(() => {
+    const m = this.valid();
+    if (!m) return [];
+    return this.special()
+      ? this.data.specialEntries().filter((e) => m.test(e.number)).map((e) => ({ date: e.date, group: e.kind, number: e.number }))
+      : this.data.entries().filter((e) => m.test(e.number)).map((e) => ({ date: e.date, group: String(e.prize), number: e.number }));
+  });
+
+  readonly stats = computed<GroupStat[]>(() => {
+    const m = this.valid();
+    // Map as a counter: group -> hits, filled in one pass over the hits.
+    const hitCount = new Map<string, number>();
+    for (const h of this.hits()) hitCount.set(h.group, (hitCount.get(h.group) ?? 0) + 1);
+    return this.groups().map((g) => {
+      const hits = hitCount.get(g.id) ?? 0;
+      // chance that one random number of this length matches, computed exactly by enumeration
+      const expected = m ? g.count * matchShare(m, g.digits) : 0;
       const ratio = expected > 0 ? hits / expected : null;
-      return {
-        prize,
-        label: PRIZE_LABEL[prize],
-        hits,
-        expected,
-        ratio,
-        barPct: ratio === null ? 0 : (Math.min(ratio, RATIO_MAX) / RATIO_MAX) * 100,
-      };
+      return { ...g, hits, expected, ratio, barPct: ratio === null ? 0 : (Math.min(ratio, RATIO_MAX) / RATIO_MAX) * 100 };
     });
   });
 
@@ -113,11 +150,12 @@ export class NumberSearch {
   readonly list = computed(() => {
     const m = this.valid();
     if (!m) return [];
+    const labels = this.labelOf();
     return this.hits()
       .slice(0, this.expanded() ? MAX_LIST : RECENT)
       .map((h) => {
         const lit = m.highlight(h.number);
-        return { ...h, label: PRIZE_LABEL[h.prize], chars: [...h.number].map((ch, i) => ({ ch, hit: lit[i] })) };
+        return { ...h, label: labels.get(h.group) ?? '', chars: [...h.number].map((ch, i) => ({ ch, hit: lit[i] })) };
       });
   });
   readonly canExpand = computed(() => this.hits().length > RECENT);

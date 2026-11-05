@@ -1,10 +1,24 @@
 <header class="sticky top-0 z-10 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-hair bg-surface px-8 py-3.5">
-  <div class="flex items-center gap-2.5">
-    <span class="rounded-md bg-gold px-[7px] py-1 font-mono text-[13px] font-bold text-on-gold" aria-hidden="true">ML</span>
+  <a routerLink="/" class="flex items-center gap-2.5" aria-label="Mui Lotto หน้าแรก">
+    <img src="logo.svg" alt="" width="30" height="30" class="size-[30px]" />
     <span class="text-base font-semibold">Mui Lotto</span>
-  </div>
+  </a>
 
-  <label class="flex min-w-[260px] flex-1 items-center gap-3 rounded-lg border border-hair bg-raised px-3.5 py-2 focus-within:border-gold">
+  <nav class="flex items-center gap-5" aria-label="แท็บ">
+    @for (t of tabs; track t.path) {
+      <a
+        [routerLink]="t.path"
+        routerLinkActive
+        [routerLinkActiveOptions]="{ exact: t.exact }"
+        ariaCurrentWhenActive="page"
+        class="border-b-2 border-transparent px-1 py-1.5 text-sm text-ink-2 hover:text-ink aria-[current=page]:border-gold aria-[current=page]:font-semibold aria-[current=page]:text-ink"
+      >
+        {{ t.label }}
+      </a>
+    }
+  </nav>
+
+  <label class="flex min-w-[240px] flex-1 items-center gap-3 rounded-lg border border-hair bg-raised px-3.5 py-2 focus-within:border-gold">
     <span class="text-base text-muted" aria-hidden="true">⌕</span>
     <input
       #cmd
@@ -43,29 +57,7 @@
 } @else if (data.file.error()) {
   <p class="p-8 text-critical">โหลด data/draws.json ไม่สำเร็จ ให้รัน <code>python scripts/export_web.py</code> ก่อน</p>
 } @else {
-  <div class="mx-auto grid max-w-[1600px] grid-cols-1 gap-5 px-8 pt-6 pb-8 min-[1100px]:grid-cols-[minmax(0,1fr)_400px]">
-    <main class="flex min-w-0 flex-col gap-5">
-      <section class="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="สรุป">
-        @for (k of kpis(); track k.label) {
-          <div class="flex min-w-0 flex-col gap-1.5 rounded-[10px] border border-hair bg-surface px-[18px] py-4">
-            <span class="text-xs text-ink-2">{{ k.label }}</span>
-            <strong class="font-mono text-[28px] leading-[1.1] font-bold whitespace-nowrap" [class]="k.gold ? 'tracking-[0.08em] text-gold' : ''">
-              {{ k.value }}
-            </strong>
-            <span class="font-mono text-[11px] text-muted">{{ k.sub }}</span>
-          </div>
-        }
-      </section>
-
-      <app-heatmap-panel />
-      <app-number-generator />
-    </main>
-
-    <!-- sticky inspector on wide screens; stacks under the main column below 1100px -->
-    <aside class="self-start rounded-xl min-[1100px]:sticky min-[1100px]:top-[88px] min-[1100px]:max-h-[calc(100vh-108px)] min-[1100px]:overflow-auto">
-      <app-number-search />
-    </aside>
-  </div>
+  <router-outlet />
 
   <footer class="mx-auto max-w-[1600px] px-8 pt-4 pb-7 text-[11px] text-muted">
     การออกรางวัลแต่ละงวดเป็นอิสระต่อกัน สถิติย้อนหลังใช้ตรวจความยุติธรรม ไม่ใช่ทำนายงวดถัดไป · ข้อมูล GLO + thai-lotto-archive

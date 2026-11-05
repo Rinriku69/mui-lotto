@@ -3,7 +3,8 @@ import { DecimalPipe } from '@angular/common';
 import { LotteryData } from '../lottery/lottery-data';
 import { PRIZES, PRIZE_LABEL } from '../lottery/lottery.model';
 import { CellStat } from '../lottery/stats';
-import { PrizeHeatmap } from './prize-heatmap';
+import { HeatGrid } from './heat-grid';
+import { HeatLegend } from './heat-legend';
 
 interface Hovered {
   prize: number;
@@ -12,7 +13,7 @@ interface Hovered {
 
 @Component({
   selector: 'app-heatmap-panel',
-  imports: [DecimalPipe, PrizeHeatmap],
+  imports: [DecimalPipe, HeatGrid, HeatLegend],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './heatmap-panel.html',
   host: { class: 'block' },

@@ -43,18 +43,20 @@ export function buildMatcher(mode: SearchMode, raw: string): Matcher | string | 
   if (!/^[0-9]{1,6}$/.test(text)) return 'กรอกเฉพาะตัวเลข 1–6 หลัก';
   const k = text.length;
 
+  // Highlights are computed from the actual number's length: the same matcher serves
+  // 6-digit prizes and 2/3-digit special prizes.
   if (mode === 'prefix') {
-    return { key: `prefix:${text}`, test: (n) => n.startsWith(text), highlight: () => mark(0, k) };
+    return { key: `prefix:${text}`, test: (n) => n.startsWith(text), highlight: (n) => mark(n.length, 0, k) };
   }
   if (mode === 'suffix') {
-    return { key: `suffix:${text}`, test: (n) => n.endsWith(text), highlight: () => mark(6 - k, k) };
+    return { key: `suffix:${text}`, test: (n) => n.endsWith(text), highlight: (n) => mark(n.length, n.length - k, k) };
   }
   // anywhere: highlight every place the run of digits occurs
   return {
     key: `anywhere:${text}`,
     test: (n) => n.includes(text),
     highlight: (n) => {
-      const out = Array<boolean>(6).fill(false);
+      const out = Array<boolean>(n.length).fill(false);
       for (let i = n.indexOf(text); i !== -1; i = n.indexOf(text, i + 1)) {
         for (let j = i; j < i + k; j++) out[j] = true;
       }
@@ -63,8 +65,8 @@ export function buildMatcher(mode: SearchMode, raw: string): Matcher | string | 
   };
 }
 
-function mark(start: number, len: number): boolean[] {
-  return Array.from({ length: 6 }, (_, i) => i >= start && i < start + len);
+function mark(size: number, start: number, len: number): boolean[] {
+  return Array.from({ length: size }, (_, i) => i >= start && i < start + len);
 }
 
 export const pad6 = (i: number) => i.toString().padStart(6, '0');
@@ -73,17 +75,28 @@ export const pad6 = (i: number) => i.toString().padStart(6, '0');
 // Re-typing the same query (or toggling a filter back) costs nothing the second time.
 const enumerationCache = new Map<string, Int32Array>();
 
-/** Every ticket 000000..999999 that passes `test`, stored as integers to save memory. */
-export function enumerate(key: string, test: (n: string) => boolean): Int32Array {
-  const hit = enumerationCache.get(key);
+/**
+ * Every number of `digits` length (000000..999999 by default) that passes `test`,
+ * stored as integers to save memory. The 2- and 3-digit prizes use digits = 2 / 3,
+ * so "chance a random number matches" is exact for them too.
+ */
+export function enumerate(key: string, test: (n: string) => boolean, digits = 6): Int32Array {
+  const cacheKey = `${digits}|${key}`;
+  const hit = enumerationCache.get(cacheKey);
   if (hit) return hit;
-  const buf = new Int32Array(SPACE);
+  const space = 10 ** digits;
+  const buf = new Int32Array(space);
   let size = 0;
-  for (let i = 0; i < SPACE; i++) if (test(pad6(i))) buf[size++] = i;
+  for (let i = 0; i < space; i++) if (test(i.toString().padStart(digits, '0'))) buf[size++] = i;
   const result = buf.slice(0, size);
   if (enumerationCache.size > 50) enumerationCache.clear();
-  enumerationCache.set(key, result);
+  enumerationCache.set(cacheKey, result);
   return result;
+}
+
+/** Share of all `digits`-length numbers that match (0..1). */
+export function matchShare(m: Matcher, digits = 6): number {
+  return enumerate(m.key, m.test, digits).length / 10 ** digits;
 }
 
 // ---------------- generator ----------------

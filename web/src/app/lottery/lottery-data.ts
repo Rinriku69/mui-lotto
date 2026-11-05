@@ -1,9 +1,9 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { debounce, form, maxLength } from '@angular/forms/signals';
-import { DrawsFile, PRIZES, WinEntry } from './lottery.model';
+import { DrawsFile, PRIZES, SPECIAL_KINDS, SpecialEntry, SpecialKind, WinEntry } from './lottery.model';
 import { SearchMode } from './number-pattern';
-import { BEYOND2_SHARE, CELLS_PER_PRIZE, digitPositionStats } from './stats';
+import { BEYOND2_SHARE, CELLS_PER_PRIZE, digitPositionStats, twoDigitStats } from './stats';
 
 export interface DateRange {
   from: string; // '' = open-ended
@@ -84,4 +84,34 @@ export class LotteryData {
 
   readonly beyond2Total = computed(() => this.prizeStats().reduce((sum, s) => sum + s.beyond2, 0));
   readonly beyond2Expected = PRIZES.length * CELLS_PER_PRIZE * BEYOND2_SHARE;
+
+  // ---------- เลขหน้า 3 ตัว / เลขท้าย 3 ตัว / เลขท้าย 2 ตัว ----------
+
+  /** Flat list of special-prize numbers in range, newest first. */
+  readonly specialEntries = computed<SpecialEntry[]>(() => {
+    const out: SpecialEntry[] = [];
+    const draws = this.draws();
+    for (let i = draws.length - 1; i >= 0; i--) {
+      const d = draws[i];
+      for (const kind of SPECIAL_KINDS) for (const number of d.special[kind]) out.push({ date: d.date, kind, number });
+    }
+    return out;
+  });
+
+  /** kind -> its numbers, same reduce() pattern as numbersByPrize. */
+  readonly specialByKind = computed(() =>
+    this.specialEntries().reduce<Record<SpecialKind, string[]>>(
+      (acc, e) => {
+        acc[e.kind].push(e.number);
+        return acc;
+      },
+      { front3: [], last3: [], last2: [] },
+    ),
+  );
+
+  readonly last2Stats = computed(() => twoDigitStats(this.specialByKind().last2));
+  readonly front3Stats = computed(() => digitPositionStats(this.specialByKind().front3, 3));
+  readonly last3Stats = computed(() => digitPositionStats(this.specialByKind().last3, 3));
+  /** Draws in range that actually had a front-3 prize (none before Sep 2015). */
+  readonly front3Draws = computed(() => this.draws().filter((d) => d.special.front3.length).length);
 }

@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Mui Lotto</title>
+  <!-- gold tile = Night Desk accent colour (theme token color-gold) -->
+  <rect width="64" height="64" rx="14" fill="#F2B544"/>
+  <!-- calico cat face, same construction as the Mui Task mark, scaled into the tile -->
+  <g transform="translate(32 34) scale(0.8) translate(-32 -32)">
+    <path d="M9 30L13 6L29 17L9 30Z" fill="#2A2622"/>
+    <path d="M35 17L51 6L55 30L35 17Z" fill="#8A3F1D"/>
+    <path d="M32 58C45.2548 58 56 48.598 56 37C56 25.402 45.2548 16 32 16C18.7452 16 8 25.402 8 37C8 48.598 18.7452 58 32 58Z" fill="#FFFDF8" stroke-width="2.5" stroke="#2A2622"/>
+    <path d="M9.5 33C10 22 19 16 29 16.5C28 25 21 31 9.5 35V33Z" fill="#2A2622"/>
+    <path d="M35 16.5C45 16 54 22 54.5 32C46 31 38 25 35 16.5Z" fill="#8A3F1D"/>
+    <path d="M24 41.2C25.436 41.2 26.6 39.767 26.6 38C26.6 36.233 25.436 34.8 24 34.8C22.564 34.8 21.4 36.233 21.4 38C21.4 39.767 22.564 41.2 24 41.2Z" fill="#2A2622"/>
+    <path d="M40 41.2C41.436 41.2 42.6 39.767 42.6 38C42.6 36.233 41.436 34.8 40 34.8C38.564 34.8 37.4 36.233 37.4 38C37.4 39.767 38.564 41.2 40 41.2Z" fill="#2A2622"/>
+    <path d="M29.5 44H34.5L32 46.8L29.5 44Z" fill="#E9AE8C"/>
+    <path d="M27 48.2C28.5 49.5 31 49 32 46.8C33 49 35.5 49.5 37 48.2" stroke-width="1.6" stroke-linecap="round" stroke="#2A2622"/>
+  </g>
+</svg>

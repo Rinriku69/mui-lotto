@@ -29,7 +29,7 @@
   </div>
 
   <div class="flex flex-wrap gap-1" role="radiogroup" aria-label="รูปแบบการค้นหา">
-    @for (m of modes; track m.value) {
+    @for (m of modes(); track m.value) {
       <label class="pill">
         <input class="sr-only" type="radio" [value]="m.value" [formField]="searchForm.mode" />
         {{ m.label }}
@@ -42,9 +42,9 @@
     <p class="text-[13px] text-critical" role="alert">{{ e }}</p>
   } @else if (!query().text.trim()) {
     <div>
-      <p class="mb-2.5 text-[13px] text-ink-2">กรอก 1–6 หลักเพื่อดูว่าเคยออกในแต่ละรางวัลกี่ครั้ง เทียบกับจำนวนที่คาดถ้าสุ่มยุติธรรม</p>
+      <p class="mb-2.5 text-[13px] text-ink-2">กรอกเลขเพื่อดูว่าเคยออกในแต่ละรางวัลกี่ครั้ง เทียบกับจำนวนที่คาดถ้าสุ่มยุติธรรม</p>
       <div class="flex gap-2">
-        @for (e of examples; track e.text) {
+        @for (e of examples(); track e.text) {
           <button type="button" class="cursor-pointer rounded-full border border-hair bg-raised px-3 py-1.5 font-mono hover:border-gold" (click)="useExample(e)">
             {{ e.text }}
           </button>
@@ -63,8 +63,8 @@
 
     <p class="text-xs text-ink-2">แยกตามรางวัล · แท่ง = พบ, ขีด = คาด</p>
     <ul class="grid gap-3">
-      @for (s of stats(); track s.prize) {
-        <li class="grid grid-cols-[72px_1fr_auto_auto] items-center gap-2.5 text-[13px]">
+      @for (s of stats(); track s.id) {
+        <li class="grid grid-cols-[92px_1fr_auto_auto] items-center gap-2.5 text-[13px]">
           <span>{{ s.label }}</span>
           <span class="relative h-2.5 rounded-[3px] bg-raised" role="img" [attr.aria-label]="s.label + ' พบ ' + s.hits + ' คาด ' + (s.expected | number: '1.0-1')">
             <span class="absolute inset-y-0 left-0 rounded-[3px]" [class]="(s.ratio ?? 0) >= 1 ? 'bg-div-pos' : 'bg-div-neg'" [style.width.%]="s.barPct"></span>

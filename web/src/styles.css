@@ -63,7 +63,7 @@
 
 /* Pill: selected state comes from aria-pressed (buttons) or a checked radio inside (labels). */
 @utility pill {
-  @apply relative inline-flex cursor-pointer items-center rounded-full border border-transparent px-3 py-[5px] font-mono text-xs text-ink-2 hover:text-ink;
+  @apply relative inline-flex cursor-pointer items-center rounded-full disabled:cursor-not-allowed disabled:opacity-40 border border-transparent px-3 py-[5px] font-mono text-xs text-ink-2 hover:text-ink;
   @apply aria-pressed:border-gold aria-pressed:bg-raised aria-pressed:font-medium aria-pressed:text-gold;
   @apply has-checked:border-gold has-checked:bg-raised has-checked:font-medium has-checked:text-gold;
   @apply has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-gold;

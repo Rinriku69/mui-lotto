@@ -1,10 +1,7 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormField, form } from '@angular/forms/signals';
 import { LotteryData } from './lottery/lottery-data';
-import { HeatmapPanel } from './heatmap/heatmap-panel';
-import { NumberSearch } from './search/number-search';
-import { NumberGenerator } from './generator/number-generator';
-import { thaiDate } from './shared/thai-date';
 
 interface Preset {
   id: string;
@@ -12,18 +9,13 @@ interface Preset {
   years: number | null; // null = all
 }
 
-interface Kpi {
-  label: string;
-  value: string;
-  sub: string;
-  gold?: boolean;
-}
-
-const num = new Intl.NumberFormat('en-US');
-
+/**
+ * App shell: command bar (tabs, shared search, date range) + the routed page.
+ * The search query and the range live in LotteryData, so both tabs see the same values.
+ */
 @Component({
   selector: 'app-root',
-  imports: [FormField, HeatmapPanel, NumberSearch, NumberGenerator],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './app.html',
   host: {
@@ -37,6 +29,11 @@ export class App {
   protected readonly searchForm = this.data.searchForm;
   protected readonly rangeForm = form(this.data.range);
 
+  protected readonly tabs = [
+    { path: '/', label: 'รางวัลที่ 1–5', exact: true },
+    { path: '/special', label: 'เลขหน้า/ท้าย', exact: false },
+  ];
+
   protected readonly presets: Preset[] = [
     { id: 'all', label: 'ALL', years: null },
     { id: '10y', label: '10Y', years: 10 },
@@ -47,23 +44,6 @@ export class App {
   protected readonly customOpen = signal(false);
 
   private readonly cmd = viewChild<ElementRef<HTMLInputElement>>('cmd');
-
-  /** The four summary tiles, all derived from the selected date range. */
-  protected readonly kpis = computed<Kpi[]>(() => {
-    const draws = this.data.draws();
-    const from = draws[0]?.date;
-    const to = draws.at(-1)?.date;
-    return [
-      { label: 'งวดในช่วงที่เลือก', value: num.format(draws.length), sub: `${thaiDate(from)} → ${thaiDate(to)}` },
-      { label: 'เลขที่ออกทั้งหมด', value: num.format(this.data.entries().length), sub: 'รางวัลที่ 1–5' },
-      {
-        label: 'ช่องที่เกิน ±2σ',
-        value: `${this.data.beyond2Total()} / 300`,
-        sub: `สุ่มยุติธรรมคาด ~${this.data.beyond2Expected.toFixed(1)}`,
-      },
-      { label: 'งวดล่าสุด · รางวัลที่ 1', value: draws.at(-1)?.prizes[0][0] ?? '–', sub: thaiDate(to), gold: true },
-    ];
-  });
 
   protected applyPreset(p: Preset) {
     this.activePreset.set(p.id);

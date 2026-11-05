@@ -29,6 +29,20 @@ describe('buildMatcher', () => {
   it('anywhere highlights every occurrence', () => {
     expect(ok(buildMatcher('anywhere', '9')).highlight('919090')).toEqual([true, false, true, false, true, false]);
   });
+
+  it('highlights by the actual length of shorter (2/3-digit) numbers', () => {
+    expect(ok(buildMatcher('suffix', '61')).highlight('261')).toEqual([false, true, true]);
+    expect(ok(buildMatcher('suffix', '61')).highlight('61')).toEqual([true, true]);
+    expect(ok(buildMatcher('prefix', '5')).highlight('512')).toEqual([true, false, false]);
+  });
+});
+
+describe('enumerate over shorter spaces', () => {
+  it('a 2-digit suffix is 1 of 100 two-digit numbers and 10 of 1,000 three-digit numbers', () => {
+    const m = ok(buildMatcher('suffix', '61'));
+    expect(enumerate(m.key, m.test, 2).length).toBe(1);
+    expect(enumerate(m.key, m.test, 3).length).toBe(10);
+  });
 });
 
 describe('enumerate (exact counts over all 1,000,000 tickets)', () => {

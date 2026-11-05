@@ -1,0 +1,40 @@
+@if (label()) {
+  <div class="mb-2 flex items-baseline justify-between">
+    <span class="text-[13px] font-semibold">{{ label() }}</span>
+    <span class="font-mono text-[11px] text-muted">{{ stats().total | number }}</span>
+  </div>
+}
+
+<div
+  class="grid gap-[3px] font-mono text-[10px] text-muted"
+  [style]="gridStyle()"
+  role="grid"
+  [attr.aria-label]="'ความถี่ ' + label()"
+  (pointerleave)="inspect.emit(null)"
+>
+  <span aria-hidden="true"></span>
+  @for (h of colHeads(); track h) {
+    <span class="grid place-items-center" aria-hidden="true">{{ h }}</span>
+  }
+  @for (row of rows(); track $index) {
+    <span class="grid place-items-center" aria-hidden="true">{{ $index }}</span>
+    @for (c of row; track c.cell.pos) {
+      <button
+        type="button"
+        class="grid cursor-crosshair place-items-center rounded-[3px] text-xs font-medium transition-shadow focus-visible:outline-none focus-visible:inset-ring-2 focus-visible:inset-ring-ink"
+        [class]="
+          (cellHeight() ? '' : 'aspect-[11/10] ') +
+          (c.strong ? 'text-white ' : 'text-ink-2 ') +
+          (active() === c.cell ? 'inset-ring-2 inset-ring-ink' : c.flagged ? 'inset-ring-[1.5px] inset-ring-gold' : '')
+        "
+        [style]="c.style"
+        [attr.aria-label]="c.aria"
+        (pointerenter)="inspect.emit(c.cell)"
+        (focus)="inspect.emit(c.cell)"
+        (blur)="inspect.emit(null)"
+      >
+        {{ c.text }}
+      </button>
+    }
+  }
+</div>

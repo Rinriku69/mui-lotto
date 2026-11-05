@@ -1,8 +1,11 @@
-# Thai Lottery Statistics (รางวัลที่ 1–5)
+# Thai Lottery Statistics (รางวัลที่ 1–5, เลขหน้า/ท้าย 3 ตัว, เลขท้าย 2 ตัว)
 
 ## Data
-- `data/lottery.db` — SQLite, table `results(draw_date, prize, number, source)`; one row = one winning number
-- `data/results_long.csv` — same data as CSV
+- `data/lottery.db` — SQLite (gitignored, rebuilt by `build_dataset.py`); one row = one winning number
+  - `results(draw_date, prize, number, source)` — prizes 1–5 (6 digits)
+  - `special_prizes(draw_date, kind, number, source)` — `kind` ∈ `front3` / `last3` / `last2`.
+    Before 2015-09-01 there is no `front3` and four `last3` numbers per draw.
+- `data/results_long.csv`, `data/special_long.csv` — same data as CSV
 - `data/glo_cache/` — raw GLO API responses (so rebuilds don't re-hit the server)
 - `raw_archive/` — clone of github.com/vicha-w/thai-lotto-archive (draw-date list + pre-2010 numbers)
 
@@ -24,6 +27,10 @@ Reports are written to `reports/`.
 SELECT substr(number, 5, 2) AS last2, COUNT(*) AS n
 FROM results WHERE prize = 1 AND draw_date >= '2020-01-01'
 GROUP BY last2 ORDER BY n DESC;
+
+-- How often each เลขท้าย 2 ตัว (last2 prize) has come out
+SELECT number, COUNT(*) AS n FROM special_prizes WHERE kind = 'last2'
+GROUP BY number ORDER BY n DESC;
 ```
 
 ## Web dashboard (`web/`, Angular 22, zoneless + signals)
@@ -34,3 +41,5 @@ npx ng build                      # static site in web/dist/web/browser (host an
 npx ng test --watch=false         # unit tests for search/generator logic
 ```
 All statistics are computed in the browser; there is no backend.
+Two tabs (Angular Router): `/` รางวัลที่ 1–5 and `/special` เลขหน้า/ท้าย; the search box is shared.
+Design: Figma file `D177fpjPHAJEn2obiImrf6` ("B · Night Desk" frames). Logo/favicon: `web/public/logo.svg`.
