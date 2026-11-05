@@ -18,10 +18,25 @@ interface Picked {
   imports: [FormField, DecimalPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './number-generator.html',
-  styleUrl: './number-generator.css',
+  host: { class: 'block' },
 })
 export class NumberGenerator {
   private readonly data = inject(LotteryData);
+
+  /**
+   * Class strings for the rule chips. They repeat many times but only in this template, so a
+   * local constant keeps one source of truth without adding more global @utility names.
+   * Kept as full literal strings so Tailwind's scanner can see every class.
+   * Border colour is deliberately NOT in the base: two border-* colour classes on one element
+   * resolve by stylesheet order, not attribute order, so each chip adds exactly one colour.
+   */
+  private readonly chipBase =
+    'inline-flex min-h-[38px] items-center gap-1.5 rounded-lg border bg-raised px-3 py-1.5 text-sm font-medium';
+  protected readonly chip = `${this.chipBase} border-hair focus-within:border-gold`;
+  protected readonly chipActive = `${this.chipBase} border-gold`;
+  protected readonly chipAdd = `${this.chipBase} border-hair cursor-pointer bg-transparent hover:border-muted`;
+  protected readonly chipInput = 'rounded bg-transparent px-1 py-0.5 font-mono outline-none placeholder:text-muted';
+  protected readonly chipSelect = 'cursor-pointer appearance-none rounded bg-surface px-2 py-0.5 outline-none';
 
   readonly digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   readonly ops: { value: CountOp; label: string }[] = [
@@ -70,6 +85,9 @@ export class NumberGenerator {
   });
   readonly poolSize = computed(() => this.pool()?.length ?? 0);
   readonly poolShare = computed(() => this.poolSize() / SPACE);
+  /** Meter width: at least a sliver when the pool is non-empty but tiny, so it never looks broken. */
+  readonly meterPct = computed(() => (this.poolSize() ? Math.max(this.poolShare() * 100, 0.4) : 0));
+  readonly quantity = computed(() => Math.min(Math.max(1, Number(this.model().quantity) || 1), 20));
 
   readonly picked = signal<Picked[]>([]);
 
@@ -87,13 +105,13 @@ export class NumberGenerator {
     // Map as a lookup table: number -> times it won (exact match) in the selected range.
     const wins = new Map<string, number>();
     for (const e of this.data.entries()) wins.set(e.number, (wins.get(e.number) ?? 0) + 1);
-    const qty = Math.min(Math.max(1, Number(this.model().quantity) || 1), 20);
-    this.picked.set(pickRandom(pool, qty).map((number) => ({ number, timesWon: wins.get(number) ?? 0 })));
+    this.picked.set(pickRandom(pool, this.quantity()).map((number) => ({ number, timesWon: wins.get(number) ?? 0 })));
   }
 
   /** Hand a generated number to the search panel and scroll to it. */
   inspect(n: string) {
     this.data.searchQuery.set({ mode: 'anywhere', text: n });
-    document.getElementById('search')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // 'nearest': on desktop the inspector is already on screen, so this is a no-op there
+    document.getElementById('search')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 }

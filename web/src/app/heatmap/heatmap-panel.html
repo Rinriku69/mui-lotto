@@ -1,0 +1,47 @@
+<section class="panel" aria-labelledby="hm-title">
+  <header class="mb-[18px] flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="eyebrow">DIGIT × POSITION</p>
+      <h2 id="hm-title" class="text-xl font-semibold">ความถี่ตัวเลขแยกตามหลัก</h2>
+      <p class="mt-1 text-[13px] text-ink-2">แถว = เลข 0–9 · คอลัมน์ = หลักที่ 1–6 · สี = ห่างจากค่าคาดกี่ σ</p>
+    </div>
+    <div class="grid w-[200px] justify-items-end gap-1.5" aria-hidden="true">
+      <div class="legend-ramp h-2 w-full rounded"></div>
+      <div class="flex w-full justify-between font-mono text-[11px] text-muted"><span>−3σ</span><span>0</span><span>+3σ</span></div>
+      <div class="flex items-center gap-1.5 text-[11px] text-ink-2">
+        <span class="h-2.5 w-3 rounded-sm bg-div-mid inset-ring-[1.5px] inset-ring-gold"></span>ขอบทอง = เกิน ±2σ
+      </div>
+    </div>
+  </header>
+
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4 min-[900px]:grid-cols-5">
+    @for (p of prizes; track p) {
+      <app-prize-heatmap
+        [label]="prizeLabel[p]"
+        [stats]="data.prizeStats()[p - 1]"
+        [active]="hovered()?.prize === p ? hovered()!.cell : null"
+        (inspect)="inspect(p, $event)"
+      />
+    }
+  </div>
+
+  <p class="mt-[18px] flex min-h-[42px] items-center gap-2.5 rounded-lg bg-raised px-3.5 py-2.5 text-[13px] text-ink-2" aria-live="polite">
+    @if (hovered(); as h) {
+      <span class="font-mono text-xs font-bold text-gold">◆</span>
+      <span>
+        <strong class="mr-2 font-semibold text-ink">{{ prizeLabel[h.prize] }} · หลักที่ {{ h.cell.pos + 1 }} · เลข {{ h.cell.digit }}</strong>
+        <span class="font-mono">
+          {{ h.cell.count | number }} ครั้ง · คาด {{ hoveredExpected() | number: '1.0-1' }} ·
+          {{ h.cell.z >= 0 ? '+' : '' }}{{ h.cell.z | number: '1.1-1' }}σ
+        </span>
+      </span>
+    } @else {
+      <span class="font-mono text-xs font-bold text-gold">i</span>
+      <span>
+        มีช่องเกิน ±2σ รวม <strong class="font-semibold text-ink">{{ data.beyond2Total() }}</strong> จาก 300 ช่อง เทียบกับ
+        ~{{ data.beyond2Expected | number: '1.1-1' }} ช่องที่การสุ่มยุติธรรมคาดไว้
+        {{ data.beyond2Total() <= data.beyond2Expected * 1.5 ? 'จึงไม่มีหลักหรือเลขใดเอนเอียงอย่างมีนัยสำคัญ' : 'มากกว่าที่คาด ควรดูต่อว่าช่องไหนเบี่ยง' }}
+      </span>
+    }
+  </p>
+</section>

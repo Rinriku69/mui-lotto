@@ -1,76 +1,79 @@
-<section class="panel" aria-labelledby="gen-title">
-  <header>
-    <h2 id="gen-title">สุ่มเลข 6 หลัก</h2>
-    <p class="sub">ตั้งเงื่อนไขแล้วสุ่มจากเลขทุกใบที่เข้าเงื่อนไข ทุกใบมีโอกาสถูกเลือกเท่ากัน</p>
-  </header>
+<section class="panel flex flex-col gap-4" aria-labelledby="gen-title">
+  <div>
+    <p class="eyebrow">GENERATOR</p>
+    <h2 id="gen-title" class="text-xl font-semibold">สุ่มเลข 6 หลัก</h2>
+  </div>
 
-  <div class="form">
-    <label class="field">
-      <span>รูปแบบตำแหน่ง <em>(ไม่บังคับ)</em></span>
-      <input class="mono" placeholder="เช่น 4xxxx9" autocomplete="off" [formField]="genForm.pattern" />
+  <div class="flex flex-wrap items-center gap-2">
+    <label [class]="chip">
+      <span>ตำแหน่ง</span>
+      <input [class]="chipInput + ' w-[8.5ch] tracking-[0.15em]'" placeholder="xxxxxx" autocomplete="off" spellcheck="false" [formField]="genForm.pattern" />
     </label>
-    <label class="field">
-      <span>ต้องมีชุดเลข <em>(ไม่บังคับ)</em></span>
-      <input class="mono" inputmode="numeric" placeholder="เช่น 99" autocomplete="off" [formField]="genForm.contains" />
+    <label [class]="chip">
+      <span>มีชุดเลข</span>
+      <input [class]="chipInput + ' w-[5ch] tracking-[0.15em]'" inputmode="numeric" placeholder="…" autocomplete="off" [formField]="genForm.contains" />
     </label>
 
-    <fieldset class="rules">
-      <legend>จำนวนครั้งที่ตัวเลขต้องปรากฏ</legend>
-      @for (r of model().rules; track $index; let i = $index) {
-        <div class="rule">
-          <span>เลข</span>
-          <select [formField]="genForm.rules[i].digit" aria-label="ตัวเลข">
-            @for (d of digits; track d) {
-              <option [value]="d">{{ d }}</option>
-            }
-          </select>
-          <select [formField]="genForm.rules[i].op" aria-label="เงื่อนไข">
-            @for (o of ops; track o.value) {
-              <option [value]="o.value">{{ o.label }}</option>
-            }
-          </select>
-          <input type="number" class="count" [formField]="genForm.rules[i].count" aria-label="จำนวนครั้ง" />
-          <span>ตัว</span>
-          <button type="button" class="ghost" (click)="removeRule(i)" [attr.aria-label]="'ลบเงื่อนไขที่ ' + (i + 1)">ลบ</button>
-        </div>
-      }
-      <button type="button" class="ghost" (click)="addRule()">+ เพิ่มเงื่อนไข</button>
-    </fieldset>
-
-    <div class="actions">
-      <label class="field qty">
-        <span>จำนวนเลข</span>
-        <input type="number" [formField]="genForm.quantity" />
-      </label>
-      <button type="button" class="primary" (click)="roll()" [disabled]="!poolSize()">สุ่ม</button>
-    </div>
+    @for (r of model().rules; track $index; let i = $index) {
+      <div [class]="chipActive">
+        <span>เลข</span>
+        <select [class]="chipSelect" [formField]="genForm.rules[i].digit" aria-label="ตัวเลข">
+          @for (d of digits; track d) {
+            <option [value]="d">{{ d }}</option>
+          }
+        </select>
+        <select [class]="chipSelect" [formField]="genForm.rules[i].op" aria-label="เงื่อนไข">
+          @for (o of ops; track o.value) {
+            <option [value]="o.value">{{ o.label }}</option>
+          }
+        </select>
+        <input type="number" [class]="chipInput + ' no-spin w-[3ch] bg-surface text-center'" [formField]="genForm.rules[i].count" aria-label="จำนวนครั้ง" />
+        <span>ตัว</span>
+        <button type="button" class="cursor-pointer pr-0.5 pl-1 text-ink-2 hover:text-ink" (click)="removeRule(i)" [attr.aria-label]="'ลบเงื่อนไขที่ ' + (i + 1)">✕</button>
+      </div>
+    }
+    <button type="button" [class]="chipAdd" (click)="addRule()">+ เงื่อนไข</button>
   </div>
 
   @if (error(); as e) {
-    <p class="error" role="alert">{{ e }}</p>
+    <p class="text-[13px] text-critical" role="alert">{{ e }}</p>
   } @else {
-    <p class="pool">
-      มีเลขเข้าเงื่อนไข <strong>{{ poolSize() | number }}</strong> ใบ จากทั้งหมด 1,000,000 ใบ
-      ({{ poolShare() * 100 | number: '1.0-4' }}%)
-      @if (!poolSize()) {
-        · <span class="error">ไม่มีเลขที่เข้าทุกเงื่อนไขพร้อมกัน</span>
-      }
-    </p>
+    <div>
+      <p class="mb-2 flex flex-wrap items-baseline gap-2 text-[13px] text-ink-2">
+        <strong class="font-mono text-[22px] font-bold text-ink">{{ poolSize() | number }}</strong>
+        <span>ใบเข้าเงื่อนไข จาก 1,000,000 · {{ poolShare() * 100 | number: '1.0-4' }}%</span>
+        @if (!poolSize()) {
+          <span class="text-critical">· ไม่มีเลขที่เข้าทุกเงื่อนไขพร้อมกัน</span>
+        }
+      </p>
+      <div class="h-1.5 overflow-hidden rounded-[3px] bg-raised" role="img" [attr.aria-label]="'สัดส่วนเลขที่เข้าเงื่อนไข ' + (poolShare() * 100 | number: '1.0-2') + '%'">
+        <span class="block h-full bg-gold transition-[width] duration-200 ease-out" [style.width.%]="meterPct()"></span>
+      </div>
+    </div>
   }
 
-  @if (picked().length) {
-    <ul class="picked">
-      @for (p of picked(); track p.number) {
-        <li>
-          <span class="big">{{ p.number }}</span>
-          <span class="won">{{ p.timesWon ? 'เคยออกเต็ม 6 หลัก ' + p.timesWon + ' ครั้ง' : 'ยังไม่เคยออกเต็ม 6 หลัก' }}</span>
-          <button type="button" class="ghost" (click)="inspect(p.number)">ดูสถิติ</button>
-        </li>
-      }
-    </ul>
-    <p class="note">
-      ไม่ว่าเงื่อนไขจะเป็นอะไร เลขทุกใบมีโอกาสถูกรางวัลที่ 1 เท่ากันคือ 1 ใน 1,000,000 การตั้งเงื่อนไขแค่เลือกว่าจะซื้อเลขแบบไหน
-      ไม่ได้ทำให้โอกาสถูกรางวัลสูงขึ้น
-    </p>
-  }
+  <div class="flex flex-wrap items-stretch gap-2.5">
+    <div class="flex flex-col justify-center gap-1.5">
+      <button type="button" class="btn-gold" (click)="roll()" [disabled]="!poolSize()">สุ่ม {{ quantity() }} เลข</button>
+      <label class="flex items-center gap-1.5 text-xs text-muted">
+        จำนวน
+        <input type="number" class="w-16 rounded-md border border-hair bg-raised px-1.5 py-0.5 font-mono text-xs" [formField]="genForm.quantity" aria-label="จำนวนเลขที่จะสุ่ม" />
+      </label>
+    </div>
+    @for (p of picked(); track p.number) {
+      <button
+        type="button"
+        class="flex cursor-pointer flex-col gap-1.5 rounded-[10px] border border-hair bg-raised px-4 py-3.5 text-left hover:border-gold focus-visible:border-gold"
+        (click)="inspect(p.number)"
+        [attr.aria-label]="'ดูสถิติเลข ' + p.number"
+      >
+        <span class="font-mono text-2xl font-bold tracking-[0.08em] text-gold">{{ p.number }}</span>
+        <span class="text-xs text-muted">{{ p.timesWon ? 'เคยออกเต็ม 6 หลัก ' + p.timesWon + ' ครั้ง' : 'ไม่เคยออกเต็ม 6 หลัก' }}</span>
+      </button>
+    }
+  </div>
+
+  <p class="text-xs text-muted">
+    ทุกเลขมีโอกาสถูกรางวัลที่ 1 เท่ากันคือ 1 ใน 1,000,000 เงื่อนไขแค่เลือกรูปแบบเลข ไม่ได้เพิ่มโอกาสถูกรางวัล · กดที่เลขเพื่อดูสถิติ
+  </p>
 </section>

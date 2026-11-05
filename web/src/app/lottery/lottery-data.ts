@@ -1,7 +1,9 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { httpResource } from '@angular/common/http';
-import { DrawsFile, WinEntry } from './lottery.model';
+import { debounce, form, maxLength } from '@angular/forms/signals';
+import { DrawsFile, PRIZES, WinEntry } from './lottery.model';
 import { SearchMode } from './number-pattern';
+import { BEYOND2_SHARE, CELLS_PER_PRIZE, digitPositionStats } from './stats';
 
 export interface DateRange {
   from: string; // '' = open-ended
@@ -16,7 +18,7 @@ export interface SearchQuery {
 /**
  * Single source of truth for the dashboard.
  * Everything downstream is a `computed()`, so changing the date range re-derives
- * heatmaps and search stats automatically - no manual subscribe/refresh wiring.
+ * heatmaps, KPIs and search stats automatically - no manual subscribe/refresh wiring.
  */
 @Injectable({ providedIn: 'root' })
 export class LotteryData {
@@ -29,8 +31,19 @@ export class LotteryData {
 
   readonly range = signal<DateRange>({ from: '', to: '' });
 
-  /** Search state lives here (not in the search component) so the generator can hand a number over. */
-  readonly searchQuery = signal<SearchQuery>({ mode: 'anywhere', text: '' });
+  /** Search state lives here so the command bar, the inspector and the generator share it. */
+  readonly searchQuery = signal<SearchQuery>({ mode: 'suffix', text: '' });
+
+  /**
+   * One signal form, bound from two places (command bar + inspector): both inputs edit the
+   * same field, so they can never disagree. form() needs an injection context, which a
+   * service field initializer has. debounce(): the model updates 250 ms after typing stops,
+   * so we don't re-scan 1M tickets on every keystroke.
+   */
+  readonly searchForm = form(this.searchQuery, (p) => {
+    debounce(p.text, 250);
+    maxLength(p.text, 6);
+  });
 
   readonly draws = computed(() => {
     const { from, to } = this.range();
@@ -65,4 +78,10 @@ export class LotteryData {
       { 1: [], 2: [], 3: [], 4: [], 5: [] },
     ),
   );
+
+  /** Digit x position stats per prize (index 0 = รางวัลที่ 1). Feeds heatmaps and KPIs. */
+  readonly prizeStats = computed(() => PRIZES.map((p) => digitPositionStats(this.numbersByPrize()[p])));
+
+  readonly beyond2Total = computed(() => this.prizeStats().reduce((sum, s) => sum + s.beyond2, 0));
+  readonly beyond2Expected = PRIZES.length * CELLS_PER_PRIZE * BEYOND2_SHARE;
 }

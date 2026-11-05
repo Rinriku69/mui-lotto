@@ -17,6 +17,8 @@
     "@angular/forms": "^22.2.0",
     "@angular/platform-browser": "^22.2.0",
     "@angular/router": "^22.2.0",
+    "@fontsource-variable/anuphan": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -24,8 +26,11 @@
     "@angular/build": "^22.2.6",
     "@angular/cli": "^22.2.6",
     "@angular/compiler-cli": "^22.2.0",
+    "@tailwindcss/postcss": "^4.3.4",
     "jsdom": "^30.0.0",
+    "postcss": "^8.5.32",
     "prettier": "^3.8.1",
+    "tailwindcss": "^4.3.4",
     "typescript": "~6.0.2",
     "vitest": "^5.0.0"
   }

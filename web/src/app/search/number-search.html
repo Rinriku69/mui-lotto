@@ -1,83 +1,107 @@
-<section class="panel" id="search" aria-labelledby="search-title">
-  <header>
-    <h2 id="search-title">ค้นหาเลข</h2>
-    <p class="sub">กรอกกี่หลักก็ได้ (1–6 หลัก) แล้วดูว่าเคยออกในแต่ละรางวัลกี่ครั้ง เทียบกับจำนวนที่คาดไว้ถ้าการสุ่มยุติธรรม</p>
-  </header>
+<section class="panel flex h-full flex-col gap-3.5" id="search" aria-labelledby="search-title">
+  <div>
+    <p class="eyebrow">INSPECTOR</p>
+    <h2 id="search-title" class="text-xl font-semibold">ค้นหาเลข</h2>
+  </div>
 
-  <div class="controls">
-    <div class="segmented" role="radiogroup" aria-label="รูปแบบการค้นหา">
-      @for (m of modes; track m.value) {
-        <label [class.on]="searchForm.mode().value() === m.value">
-          <input type="radio" [value]="m.value" [formField]="searchForm.mode" />
-          {{ m.label }}
-        </label>
-      }
-    </div>
+  <div
+    class="flex items-center gap-0.5 rounded-lg border bg-raised px-3.5 py-2 font-mono text-[26px] tracking-[0.16em] focus-within:ring-3 focus-within:ring-gold/25"
+    [class]="error() ? 'border-critical' : 'border-gold'"
+  >
+    @if (ghost().before) {
+      <span class="text-muted" aria-hidden="true">{{ ghost().before }}</span>
+    }
     <input
-      class="query"
+      class="min-w-[2ch] flex-1 bg-transparent font-bold text-gold outline-none placeholder:font-normal placeholder:text-muted"
       inputmode="numeric"
-     
       autocomplete="off"
-      placeholder="เช่น 59"
+      spellcheck="false"
+      placeholder="61"
       aria-label="เลขที่ต้องการค้นหา"
       [formField]="searchForm.text"
     />
+    @if (ghost().after) {
+      <span class="text-muted" aria-hidden="true">{{ ghost().after }}</span>
+    }
+    @if (query().text) {
+      <button type="button" class="cursor-pointer p-1 text-sm tracking-normal text-muted hover:text-ink" (click)="clear()" aria-label="ล้างคำค้น">✕</button>
+    }
   </div>
-  <p class="hint">{{ hint() }}</p>
+
+  <div class="flex flex-wrap gap-1" role="radiogroup" aria-label="รูปแบบการค้นหา">
+    @for (m of modes; track m.value) {
+      <label class="pill">
+        <input class="sr-only" type="radio" [value]="m.value" [formField]="searchForm.mode" />
+        {{ m.label }}
+      </label>
+    }
+  </div>
+  <p class="-mt-1.5 text-xs text-muted">{{ hint() }}</p>
 
   @if (error(); as e) {
-    <p class="error" role="alert">{{ e }}</p>
-  } @else if (stats()[0].total && spaceShare() > 0) {
-    <p class="summary">
-      พบ <strong>{{ totalHits() | number }}</strong> ครั้ง · คาด
-      <strong>{{ totalExpected() | number: '1.0-1' }}</strong> ครั้ง ·
-      เลขสุ่ม 1 ใบจะเข้าเงื่อนไขนี้ {{ spaceShare() | percent: '1.0-4' }}
-    </p>
-
-    <table class="stats">
-      <thead>
-        <tr>
-          <th scope="col">รางวัล</th>
-          <th scope="col" class="num">พบ</th>
-          <th scope="col" class="num">คาด</th>
-          <th scope="col" class="num">พบ/คาด</th>
-          <th scope="col">ออกล่าสุด</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (s of stats(); track s.prize) {
-          <tr>
-            <th scope="row">{{ s.label }}</th>
-            <td class="num"><strong>{{ s.hits | number }}</strong></td>
-            <td class="num">{{ s.expected | number: '1.0-2' }}</td>
-            <td class="num">{{ s.ratio === null ? '–' : (s.ratio | number: '1.2-2') + '×' }}</td>
-            <td>{{ s.lastSeen ?? '–' }}</td>
-          </tr>
+    <p class="text-[13px] text-critical" role="alert">{{ e }}</p>
+  } @else if (!query().text.trim()) {
+    <div>
+      <p class="mb-2.5 text-[13px] text-ink-2">กรอก 1–6 หลักเพื่อดูว่าเคยออกในแต่ละรางวัลกี่ครั้ง เทียบกับจำนวนที่คาดถ้าสุ่มยุติธรรม</p>
+      <div class="flex gap-2">
+        @for (e of examples; track e.text) {
+          <button type="button" class="cursor-pointer rounded-full border border-hair bg-raised px-3 py-1.5 font-mono hover:border-gold" (click)="useExample(e)">
+            {{ e.text }}
+          </button>
         }
-      </tbody>
-    </table>
-    <p class="note">
-      "พบ/คาด" ใกล้ 1.00 = ปกติ · ถ้าคาดไว้ต่ำกว่า ~5 ครั้ง ผลที่ได้แกว่งตามความบังเอิญมาก อย่าเพิ่งสรุปจากตัวเลขนี้
-    </p>
+      </div>
+    </div>
+  } @else {
+    <div class="flex gap-6">
+      @for (s of summary(); track s.label) {
+        <div class="flex flex-col">
+          <strong class="font-mono text-2xl font-bold" [class.text-gold]="s.gold">{{ s.value }}</strong>
+          <span class="text-xs text-muted">{{ s.label }}</span>
+        </div>
+      }
+    </div>
 
+    <p class="text-xs text-ink-2">แยกตามรางวัล · แท่ง = พบ, ขีด = คาด</p>
+    <ul class="grid gap-3">
+      @for (s of stats(); track s.prize) {
+        <li class="grid grid-cols-[72px_1fr_auto_auto] items-center gap-2.5 text-[13px]">
+          <span>{{ s.label }}</span>
+          <span class="relative h-2.5 rounded-[3px] bg-raised" role="img" [attr.aria-label]="s.label + ' พบ ' + s.hits + ' คาด ' + (s.expected | number: '1.0-1')">
+            <span class="absolute inset-y-0 left-0 rounded-[3px]" [class]="(s.ratio ?? 0) >= 1 ? 'bg-div-pos' : 'bg-div-neg'" [style.width.%]="s.barPct"></span>
+            <span class="absolute -inset-y-[3px] -ml-px w-0.5 bg-ink" [style.left.%]="tickPct"></span>
+          </span>
+          <span class="min-w-[3ch] text-right font-mono font-medium">{{ s.hits | number }}</span>
+          <span class="min-w-[6ch] font-mono text-xs text-muted">/{{ s.expected | number: '1.0-1' }}</span>
+        </li>
+      }
+    </ul>
+    @if (lowExpected()) {
+      <p class="text-xs text-muted">รางวัลที่ค่าคาดต่ำกว่า ~5 ครั้ง ผลแกว่งจากความบังเอิญมาก อย่าเพิ่งสรุปจากตัวเลขนั้น</p>
+    }
+
+    <hr class="my-1 border-hair" />
+    <h3 class="text-sm font-semibold">ออกล่าสุด</h3>
     @if (list().length) {
-      <h3 class="list-title">งวดที่ออก (ล่าสุดก่อน)</h3>
-      <ul class="hits">
+      <ul class="-mt-1.5" [class]="expanded() ? 'max-h-[360px] overflow-auto' : ''">
         @for (h of list(); track $index) {
-          <li>
-            <span class="date">{{ h.date }}</span>
-            <span class="no">
+          <li class="flex items-baseline gap-3 border-b border-hair py-2">
+            <span class="font-mono text-xs text-muted">{{ h.date }}</span>
+            <span class="font-mono text-[15px] tracking-[0.06em] text-ink-2">
               @for (c of h.chars; track $index) {
-                <span [class.lit]="c.hit">{{ c.ch }}</span>
+                <span [class]="c.hit ? 'font-bold text-gold' : ''">{{ c.ch }}</span>
               }
             </span>
-            <span class="prize">{{ h.label }}</span>
+            <span class="ml-auto text-xs text-muted">{{ h.label }}</span>
           </li>
         }
       </ul>
-      @if (truncated()) {
-        <p class="note">แสดง 120 รายการแรกจากทั้งหมด {{ totalHits() | number }}</p>
+      @if (canExpand()) {
+        <button type="button" class="cursor-pointer self-start text-[13px] font-medium text-gold hover:underline" (click)="expanded.set(!expanded())">
+          {{ expanded() ? 'ย่อรายการ' : 'ดูทั้งหมด ' + (totalHits() | number) + ' รายการ →' }}
+        </button>
       }
+    } @else {
+      <p class="text-xs text-muted">ไม่เคยออกในช่วงเวลาที่เลือก</p>
     }
   }
 </section>

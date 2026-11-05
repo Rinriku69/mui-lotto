@@ -1,59 +1,73 @@
-<main>
-  <header class="top">
-    <div>
-      <h1>สถิติสลากกินแบ่งรัฐบาล</h1>
-      <p class="lede">รางวัลที่ 1–5 · ข้อมูลจาก GLO และ thai-lotto-archive</p>
+<header class="sticky top-0 z-10 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-hair bg-surface px-8 py-3.5">
+  <div class="flex items-center gap-2.5">
+    <span class="rounded-md bg-gold px-[7px] py-1 font-mono text-[13px] font-bold text-on-gold" aria-hidden="true">ML</span>
+    <span class="text-base font-semibold">Mui Lotto</span>
+  </div>
+
+  <label class="flex min-w-[260px] flex-1 items-center gap-3 rounded-lg border border-hair bg-raised px-3.5 py-2 focus-within:border-gold">
+    <span class="text-base text-muted" aria-hidden="true">⌕</span>
+    <input
+      #cmd
+      class="flex-1 bg-transparent font-mono tracking-[0.06em] outline-none placeholder:font-sans placeholder:tracking-normal placeholder:text-muted"
+      inputmode="numeric"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="ค้นหาเลข…  เช่น 61, 888, x4xx99"
+      aria-label="ค้นหาเลข"
+      [formField]="searchForm.text"
+    />
+    <kbd class="rounded border border-hair px-1.5 font-mono text-[11px] text-muted" aria-hidden="true">/</kbd>
+  </label>
+
+  <nav class="flex flex-wrap gap-1" aria-label="ช่วงข้อมูล">
+    @for (p of presets; track p.id) {
+      <button type="button" class="pill" [attr.aria-pressed]="activePreset() === p.id" (click)="applyPreset(p)">{{ p.label }}</button>
+    }
+    <button type="button" class="pill" [attr.aria-pressed]="activePreset() === 'custom'" [attr.aria-expanded]="customOpen()" (click)="toggleCustom()">
+      กำหนดเอง ▾
+    </button>
+  </nav>
+
+  <span class="font-mono text-[11px] text-muted">● SYNC {{ data.lastDate() || '—' }}</span>
+
+  @if (customOpen()) {
+    <div class="flex basis-full justify-end gap-4 text-xs text-ink-2" role="group" aria-label="ช่วงวันที่">
+      <label class="flex items-center gap-1.5">ตั้งแต่ <input type="date" [formField]="rangeForm.from" /></label>
+      <label class="flex items-center gap-1.5">ถึง <input type="date" [formField]="rangeForm.to" /></label>
     </div>
-  </header>
-
-  @if (data.file.isLoading()) {
-    <p class="state">กำลังโหลดข้อมูล…</p>
-  } @else if (data.file.error()) {
-    <p class="state error">โหลด data/draws.json ไม่สำเร็จ ให้รัน <code>python scripts/export_web.py</code> ก่อน</p>
-  } @else {
-    <section class="filters" aria-label="ช่วงเวลา">
-      <div class="presets">
-        @for (p of presets; track p.label) {
-          <button type="button" class="ghost" (click)="applyPreset(p)">{{ p.label }}</button>
-        }
-      </div>
-      <label>ตั้งแต่ <input type="date" [formField]="rangeForm.from" /></label>
-      <label>ถึง <input type="date" [formField]="rangeForm.to" /></label>
-      <p class="tiles">
-        <span><strong>{{ data.draws().length | number }}</strong> งวด</span>
-        <span><strong>{{ data.entries().length | number }}</strong> เลข</span>
-        <span>{{ shownFrom() }} → {{ shownTo() }}</span>
-      </p>
-    </section>
-
-    <section aria-labelledby="hm-title">
-      <div class="section-head">
-        <div>
-          <h2 id="hm-title">ตัวเลข × หลัก</h2>
-          <p class="sub">
-            แต่ละช่องคือจำนวนครั้งที่ตัวเลขนั้น (แถว 0–9) ออกในหลักนั้น (คอลัมน์ 1–6 นับจากซ้าย) สีบอกว่าห่างจากค่าที่คาดไว้กี่ σ
-            ถ้าสุ่มยุติธรรม เกือบทุกช่องควรอยู่ในช่วง ±2σ
-          </p>
-        </div>
-        <div class="legend" aria-hidden="true">
-          <span>น้อยกว่าคาด</span>
-          <div class="ramp"></div>
-          <span>มากกว่าคาด</span>
-          <div class="ticks"><span>−3σ</span><span>0</span><span>+3σ</span></div>
-        </div>
-      </div>
-      <div class="heatmaps">
-        @for (p of prizes; track p) {
-          <app-prize-heatmap [label]="prizeLabel[p]" [numbers]="data.numbersByPrize()[p]" />
-        }
-      </div>
-    </section>
-
-    <app-number-search />
-    <app-number-generator />
-
-    <footer>
-      การออกรางวัลแต่ละงวดเป็นอิสระต่อกัน สถิติย้อนหลังใช้ตรวจว่าการสุ่มยุติธรรมหรือไม่ ไม่สามารถใช้ทำนายเลขที่จะออกงวดต่อไปได้
-    </footer>
   }
-</main>
+</header>
+
+@if (data.file.isLoading()) {
+  <p class="p-8 text-ink-2">กำลังโหลดข้อมูล…</p>
+} @else if (data.file.error()) {
+  <p class="p-8 text-critical">โหลด data/draws.json ไม่สำเร็จ ให้รัน <code>python scripts/export_web.py</code> ก่อน</p>
+} @else {
+  <div class="mx-auto grid max-w-[1600px] grid-cols-1 gap-5 px-8 pt-6 pb-8 min-[1100px]:grid-cols-[minmax(0,1fr)_400px]">
+    <main class="flex min-w-0 flex-col gap-5">
+      <section class="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="สรุป">
+        @for (k of kpis(); track k.label) {
+          <div class="flex min-w-0 flex-col gap-1.5 rounded-[10px] border border-hair bg-surface px-[18px] py-4">
+            <span class="text-xs text-ink-2">{{ k.label }}</span>
+            <strong class="font-mono text-[28px] leading-[1.1] font-bold whitespace-nowrap" [class]="k.gold ? 'tracking-[0.08em] text-gold' : ''">
+              {{ k.value }}
+            </strong>
+            <span class="font-mono text-[11px] text-muted">{{ k.sub }}</span>
+          </div>
+        }
+      </section>
+
+      <app-heatmap-panel />
+      <app-number-generator />
+    </main>
+
+    <!-- sticky inspector on wide screens; stacks under the main column below 1100px -->
+    <aside class="self-start rounded-xl min-[1100px]:sticky min-[1100px]:top-[88px] min-[1100px]:max-h-[calc(100vh-108px)] min-[1100px]:overflow-auto">
+      <app-number-search />
+    </aside>
+  </div>
+
+  <footer class="mx-auto max-w-[1600px] px-8 pt-4 pb-7 text-[11px] text-muted">
+    การออกรางวัลแต่ละงวดเป็นอิสระต่อกัน สถิติย้อนหลังใช้ตรวจความยุติธรรม ไม่ใช่ทำนายงวดถัดไป · ข้อมูล GLO + thai-lotto-archive
+  </footer>
+}

@@ -1,169 +1,98 @@
-/* Design tokens: components reference roles (--text-primary...), never raw hex,
-   so light/dark swap in one place. Values from the validated reference palette. */
-:root {
-  color-scheme: light;
-  --page: #f9f9f7;
-  --surface-1: #fcfcfb;
-  --surface-2: #f3f2ef;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #6f6d68;
-  --gridline: #e1e0d9;
-  --border: rgba(11, 11, 11, 0.1);
-  --border-strong: rgba(11, 11, 11, 0.22);
-  --accent: #2a78d6;
-  --critical: #d03b3b;
+@import 'tailwindcss';
+/* Self-hosted variable fonts (npm @fontsource-variable/*): no third-party font requests. */
+@import '@fontsource-variable/anuphan';
+@import '@fontsource-variable/jetbrains-mono';
+
+/*
+ * Design tokens for "B · Night Desk" (mirrors the Figma variable collection of the same name).
+ * In Tailwind v4 the theme lives in CSS: every --color-* here becomes bg-*, text-*, border-*, ring-* ...
+ * utilities (e.g. --color-gold -> bg-gold, text-gold), and the same names stay usable as
+ * plain CSS variables (var(--color-gold)) for runtime values like heatmap cell colours.
+ * Dark-only by design.
+ */
+@theme {
+  --color-page: #0d0e10;
+  --color-surface: #15171a;
+  --color-raised: #1d2024;
+  --color-ink: #edeef0;
+  --color-ink-2: #a9adb4;
+  /* Figma uses #6F747C; lifted slightly so small muted text clears 4.5:1 on surface */
+  --color-muted: #868b94;
+  --color-hair: #2a2d32;
+  --color-gold: #f2b544;
+  --color-on-gold: #17130a;
+  --color-critical: #e66767;
   /* diverging heatmap: blue (fewer than expected) <-> gray <-> red (more than expected) */
-  --div-neg: #1c5cab;
-  --div-mid: #f0efec;
-  --div-pos: #c43a39;
+  --color-div-neg: #3987e5;
+  --color-div-mid: #2c2f34;
+  --color-div-pos: #e05555;
+
+  --font-sans: 'Anuphan Variable', system-ui, 'Leelawadee UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Mono', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
     color-scheme: dark;
-    --page: #0d0d0d;
-    --surface-1: #1a1a19;
-    --surface-2: #232321;
-    --text-primary: #f0efec;
-    --text-secondary: #c3c2b7;
-    --text-muted: #9a988f;
-    --gridline: #2c2c2a;
-    --border: rgba(255, 255, 255, 0.1);
-    --border-strong: rgba(255, 255, 255, 0.22);
-    --accent: #3987e5;
-    --critical: #e66767;
-    --div-neg: #3987e5;
-    --div-mid: #383835;
-    --div-pos: #e05555;
+  }
+
+  body {
+    @apply bg-page font-sans text-sm leading-normal text-ink;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-gold;
+  }
+
+  input[type='date'] {
+    @apply rounded-lg border border-hair bg-raised px-2.5 py-1.5 font-mono text-xs;
   }
 }
 
-* {
-  box-sizing: border-box;
+/*
+ * A handful of patterns repeat across components. @utility (Tailwind v4) defines them once
+ * as real utilities, so they work with variants (hover:, md: ...) like any built-in class.
+ */
+@utility panel {
+  @apply rounded-xl border border-hair bg-surface p-[22px];
 }
 
-body {
-  margin: 0;
-  background: var(--page);
-  color: var(--text-primary);
-  font-family: system-ui, -apple-system, 'Segoe UI', 'Leelawadee UI', 'Noto Sans Thai', sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+@utility eyebrow {
+  @apply mb-1.5 font-mono text-[11px] font-medium tracking-[0.14em] text-gold;
 }
 
-h1,
-h2,
-h3 {
-  line-height: 1.25;
+/* Pill: selected state comes from aria-pressed (buttons) or a checked radio inside (labels). */
+@utility pill {
+  @apply relative inline-flex cursor-pointer items-center rounded-full border border-transparent px-3 py-[5px] font-mono text-xs text-ink-2 hover:text-ink;
+  @apply aria-pressed:border-gold aria-pressed:bg-raised aria-pressed:font-medium aria-pressed:text-gold;
+  @apply has-checked:border-gold has-checked:bg-raised has-checked:font-medium has-checked:text-gold;
+  @apply has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-gold;
 }
 
-input,
-select,
-button {
-  font: inherit;
-  color: inherit;
+@utility btn-gold {
+  @apply cursor-pointer rounded-lg bg-gold px-[22px] py-[11px] text-[15px] font-semibold text-on-gold hover:bg-[color-mix(in_oklch,var(--color-gold)_88%,white)] disabled:cursor-not-allowed disabled:opacity-40;
 }
 
-input,
-select {
-  padding: 6px 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  background: var(--surface-1);
+/* Diverging legend: stops mirror zStrength(): z = -3,-2,-1,0,+1,+2,+3 -> strength 100/44/11/0 %. */
+@utility legend-ramp {
+  background: linear-gradient(
+    to right,
+    var(--color-div-neg) 0%,
+    color-mix(in oklch, var(--color-div-neg) 44%, var(--color-div-mid)) 16.7%,
+    color-mix(in oklch, var(--color-div-neg) 11%, var(--color-div-mid)) 33.3%,
+    var(--color-div-mid) 50%,
+    color-mix(in oklch, var(--color-div-pos) 11%, var(--color-div-mid)) 66.7%,
+    color-mix(in oklch, var(--color-div-pos) 44%, var(--color-div-mid)) 83.3%,
+    var(--color-div-pos) 100%
+  );
 }
 
-input:focus-visible,
-select:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-input[aria-invalid='true'] {
-  border-color: var(--critical);
-}
-
-button {
-  cursor: pointer;
-  border-radius: 8px;
-  padding: 6px 14px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface-1);
-}
-
-button.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-  font-weight: 600;
-  padding: 8px 28px;
-}
-
-button.primary:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-button.ghost {
-  border-color: transparent;
-  background: transparent;
-  color: var(--accent);
-  padding: 4px 8px;
-}
-
-button.ghost:hover {
-  background: var(--surface-2);
-}
-
-/* shared panel look for search/generator sections */
-.panel {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px 22px;
-}
-
-.panel h2 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.panel .sub {
-  margin: 4px 0 14px;
-  color: var(--text-secondary);
-  font-size: 13px;
-}
-
-.segmented {
-  display: inline-flex;
-  background: var(--surface-2);
-  border-radius: 9px;
-  padding: 3px;
-  gap: 2px;
-}
-
-.segmented label {
-  padding: 5px 12px;
-  border-radius: 7px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.segmented label.on {
-  background: var(--surface-1);
-  color: var(--text-primary);
-  box-shadow: 0 0 0 1px var(--border);
-  font-weight: 600;
-}
-
-.segmented label:has(input:focus-visible) {
-  outline: 2px solid var(--accent);
-}
-
-.segmented input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+/* Number input without native spinners (they cover a 1-digit field; arrow keys still step). */
+@utility no-spin {
+  appearance: textfield;
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
 }
