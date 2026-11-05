@@ -1,0 +1,59 @@
+<main>
+  <header class="top">
+    <div>
+      <h1>สถิติสลากกินแบ่งรัฐบาล</h1>
+      <p class="lede">รางวัลที่ 1–5 · ข้อมูลจาก GLO และ thai-lotto-archive</p>
+    </div>
+  </header>
+
+  @if (data.file.isLoading()) {
+    <p class="state">กำลังโหลดข้อมูล…</p>
+  } @else if (data.file.error()) {
+    <p class="state error">โหลด data/draws.json ไม่สำเร็จ ให้รัน <code>python scripts/export_web.py</code> ก่อน</p>
+  } @else {
+    <section class="filters" aria-label="ช่วงเวลา">
+      <div class="presets">
+        @for (p of presets; track p.label) {
+          <button type="button" class="ghost" (click)="applyPreset(p)">{{ p.label }}</button>
+        }
+      </div>
+      <label>ตั้งแต่ <input type="date" [formField]="rangeForm.from" /></label>
+      <label>ถึง <input type="date" [formField]="rangeForm.to" /></label>
+      <p class="tiles">
+        <span><strong>{{ data.draws().length | number }}</strong> งวด</span>
+        <span><strong>{{ data.entries().length | number }}</strong> เลข</span>
+        <span>{{ shownFrom() }} → {{ shownTo() }}</span>
+      </p>
+    </section>
+
+    <section aria-labelledby="hm-title">
+      <div class="section-head">
+        <div>
+          <h2 id="hm-title">ตัวเลข × หลัก</h2>
+          <p class="sub">
+            แต่ละช่องคือจำนวนครั้งที่ตัวเลขนั้น (แถว 0–9) ออกในหลักนั้น (คอลัมน์ 1–6 นับจากซ้าย) สีบอกว่าห่างจากค่าที่คาดไว้กี่ σ
+            ถ้าสุ่มยุติธรรม เกือบทุกช่องควรอยู่ในช่วง ±2σ
+          </p>
+        </div>
+        <div class="legend" aria-hidden="true">
+          <span>น้อยกว่าคาด</span>
+          <div class="ramp"></div>
+          <span>มากกว่าคาด</span>
+          <div class="ticks"><span>−3σ</span><span>0</span><span>+3σ</span></div>
+        </div>
+      </div>
+      <div class="heatmaps">
+        @for (p of prizes; track p) {
+          <app-prize-heatmap [label]="prizeLabel[p]" [numbers]="data.numbersByPrize()[p]" />
+        }
+      </div>
+    </section>
+
+    <app-number-search />
+    <app-number-generator />
+
+    <footer>
+      การออกรางวัลแต่ละงวดเป็นอิสระต่อกัน สถิติย้อนหลังใช้ตรวจว่าการสุ่มยุติธรรมหรือไม่ ไม่สามารถใช้ทำนายเลขที่จะออกงวดต่อไปได้
+    </footer>
+  }
+</main>

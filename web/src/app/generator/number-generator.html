@@ -1,0 +1,76 @@
+<section class="panel" aria-labelledby="gen-title">
+  <header>
+    <h2 id="gen-title">สุ่มเลข 6 หลัก</h2>
+    <p class="sub">ตั้งเงื่อนไขแล้วสุ่มจากเลขทุกใบที่เข้าเงื่อนไข ทุกใบมีโอกาสถูกเลือกเท่ากัน</p>
+  </header>
+
+  <div class="form">
+    <label class="field">
+      <span>รูปแบบตำแหน่ง <em>(ไม่บังคับ)</em></span>
+      <input class="mono" placeholder="เช่น 4xxxx9" autocomplete="off" [formField]="genForm.pattern" />
+    </label>
+    <label class="field">
+      <span>ต้องมีชุดเลข <em>(ไม่บังคับ)</em></span>
+      <input class="mono" inputmode="numeric" placeholder="เช่น 99" autocomplete="off" [formField]="genForm.contains" />
+    </label>
+
+    <fieldset class="rules">
+      <legend>จำนวนครั้งที่ตัวเลขต้องปรากฏ</legend>
+      @for (r of model().rules; track $index; let i = $index) {
+        <div class="rule">
+          <span>เลข</span>
+          <select [formField]="genForm.rules[i].digit" aria-label="ตัวเลข">
+            @for (d of digits; track d) {
+              <option [value]="d">{{ d }}</option>
+            }
+          </select>
+          <select [formField]="genForm.rules[i].op" aria-label="เงื่อนไข">
+            @for (o of ops; track o.value) {
+              <option [value]="o.value">{{ o.label }}</option>
+            }
+          </select>
+          <input type="number" class="count" [formField]="genForm.rules[i].count" aria-label="จำนวนครั้ง" />
+          <span>ตัว</span>
+          <button type="button" class="ghost" (click)="removeRule(i)" [attr.aria-label]="'ลบเงื่อนไขที่ ' + (i + 1)">ลบ</button>
+        </div>
+      }
+      <button type="button" class="ghost" (click)="addRule()">+ เพิ่มเงื่อนไข</button>
+    </fieldset>
+
+    <div class="actions">
+      <label class="field qty">
+        <span>จำนวนเลข</span>
+        <input type="number" [formField]="genForm.quantity" />
+      </label>
+      <button type="button" class="primary" (click)="roll()" [disabled]="!poolSize()">สุ่ม</button>
+    </div>
+  </div>
+
+  @if (error(); as e) {
+    <p class="error" role="alert">{{ e }}</p>
+  } @else {
+    <p class="pool">
+      มีเลขเข้าเงื่อนไข <strong>{{ poolSize() | number }}</strong> ใบ จากทั้งหมด 1,000,000 ใบ
+      ({{ poolShare() * 100 | number: '1.0-4' }}%)
+      @if (!poolSize()) {
+        · <span class="error">ไม่มีเลขที่เข้าทุกเงื่อนไขพร้อมกัน</span>
+      }
+    </p>
+  }
+
+  @if (picked().length) {
+    <ul class="picked">
+      @for (p of picked(); track p.number) {
+        <li>
+          <span class="big">{{ p.number }}</span>
+          <span class="won">{{ p.timesWon ? 'เคยออกเต็ม 6 หลัก ' + p.timesWon + ' ครั้ง' : 'ยังไม่เคยออกเต็ม 6 หลัก' }}</span>
+          <button type="button" class="ghost" (click)="inspect(p.number)">ดูสถิติ</button>
+        </li>
+      }
+    </ul>
+    <p class="note">
+      ไม่ว่าเงื่อนไขจะเป็นอะไร เลขทุกใบมีโอกาสถูกรางวัลที่ 1 เท่ากันคือ 1 ใน 1,000,000 การตั้งเงื่อนไขแค่เลือกว่าจะซื้อเลขแบบไหน
+      ไม่ได้ทำให้โอกาสถูกรางวัลสูงขึ้น
+    </p>
+  }
+</section>

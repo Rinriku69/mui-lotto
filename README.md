@@ -26,3 +26,11 @@ FROM results WHERE prize = 1 AND draw_date >= '2020-01-01'
 GROUP BY last2 ORDER BY n DESC;
 ```
 
+## Web dashboard (`web/`, Angular 22, zoneless + signals)
+```bash
+python scripts/export_web.py      # SQLite -> web/public/data/draws.json (re-run after new draws)
+cd web && npm start               # dev server: http://localhost:4200
+npx ng build                      # static site in web/dist/web/browser (host anywhere)
+npx ng test --watch=false         # unit tests for search/generator logic
+```
+All statistics are computed in the browser; there is no backend.

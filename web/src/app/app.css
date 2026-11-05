@@ -1,0 +1,131 @@
+main {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.lede,
+.sub {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.state {
+  color: var(--text-secondary);
+}
+
+.state.error {
+  color: var(--critical);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 10px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+}
+
+.filters label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--text-secondary);
+}
+
+.presets {
+  display: flex;
+  gap: 2px;
+}
+
+.tiles {
+  margin: 0 0 0 auto;
+  display: flex;
+  gap: 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.tiles strong {
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.section-head .sub {
+  max-width: 720px;
+}
+
+.legend {
+  display: grid;
+  grid-template-columns: auto 160px auto;
+  align-items: center;
+  gap: 2px 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.ramp {
+  height: 10px;
+  border-radius: 4px;
+  /* stops mirror the heatmap's squared mapping: z = -3, -2, -1, 0, +1, +2, +3 */
+  background: linear-gradient(
+    to right,
+    var(--div-neg) 0%,
+    color-mix(in oklch, var(--div-neg) 44%, var(--div-mid)) 16.7%,
+    color-mix(in oklch, var(--div-neg) 11%, var(--div-mid)) 33.3%,
+    var(--div-mid) 50%,
+    color-mix(in oklch, var(--div-pos) 11%, var(--div-mid)) 66.7%,
+    color-mix(in oklch, var(--div-pos) 44%, var(--div-mid)) 83.3%,
+    var(--div-pos) 100%
+  );
+}
+
+.ticks {
+  grid-column: 2;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.heatmaps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+
+footer {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  padding-top: 8px;
+}

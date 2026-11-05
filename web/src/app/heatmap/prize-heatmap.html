@@ -1,0 +1,39 @@
+<figure class="card">
+  <figcaption>
+    <h3>{{ label() }}</h3>
+    <p class="meta">{{ total() | number }} เลข · คาด {{ expected() | number: '1.0-1' }} ครั้ง/ช่อง</p>
+  </figcaption>
+
+  <div class="grid" role="table" [attr.aria-label]="'ความถี่ตัวเลขแยกตามหลัก ' + label()" (pointerleave)="hovered.set(null)">
+    <div class="corner" role="presentation"></div>
+    @for (p of positions; track p) {
+      <div class="col-head" role="columnheader">{{ p + 1 }}</div>
+    }
+    @for (row of cells(); track $index) {
+      <div class="row-head" role="rowheader">{{ $index }}</div>
+      @for (c of row; track c.pos) {
+        <div
+          class="cell"
+          role="cell"
+          [class.strong]="c.strong"
+          [class.active]="hovered() === c"
+          [style]="c.style"
+          [attr.aria-label]="'หลักที่ ' + (c.pos + 1) + ' เลข ' + c.digit + ': ' + c.count + ' ครั้ง'"
+          (pointerenter)="hovered.set(c)"
+        >
+          {{ c.count }}
+        </div>
+      }
+    }
+  </div>
+
+  <p class="readout" aria-live="polite">
+    @if (hovered(); as h) {
+      <strong>{{ h.count | number }} ครั้ง</strong>
+      <span>หลักที่ {{ h.pos + 1 }} · เลข {{ h.digit }} · คาด {{ expected() | number: '1.0-1' }} ·
+        {{ h.z >= 0 ? '+' : '' }}{{ h.z | number: '1.1-1' }}σ</span>
+    } @else {
+      <span>เกิน ±2σ: <strong>{{ beyond2() }}</strong> ช่อง (สุ่มยุติธรรมคาด ~{{ expectedBeyond2 | number: '1.1-1' }})</span>
+    }
+  </p>
+</figure>

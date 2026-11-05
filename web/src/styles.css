@@ -1,0 +1,169 @@
+/* Design tokens: components reference roles (--text-primary...), never raw hex,
+   so light/dark swap in one place. Values from the validated reference palette. */
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface-1: #fcfcfb;
+  --surface-2: #f3f2ef;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #6f6d68;
+  --gridline: #e1e0d9;
+  --border: rgba(11, 11, 11, 0.1);
+  --border-strong: rgba(11, 11, 11, 0.22);
+  --accent: #2a78d6;
+  --critical: #d03b3b;
+  /* diverging heatmap: blue (fewer than expected) <-> gray <-> red (more than expected) */
+  --div-neg: #1c5cab;
+  --div-mid: #f0efec;
+  --div-pos: #c43a39;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --surface-2: #232321;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #9a988f;
+    --gridline: #2c2c2a;
+    --border: rgba(255, 255, 255, 0.1);
+    --border-strong: rgba(255, 255, 255, 0.22);
+    --accent: #3987e5;
+    --critical: #e66767;
+    --div-neg: #3987e5;
+    --div-mid: #383835;
+    --div-pos: #e05555;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, 'Segoe UI', 'Leelawadee UI', 'Noto Sans Thai', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+}
+
+input,
+select,
+button {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+select {
+  padding: 6px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-1);
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+input[aria-invalid='true'] {
+  border-color: var(--critical);
+}
+
+button {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-1);
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 8px 28px;
+}
+
+button.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--accent);
+  padding: 4px 8px;
+}
+
+button.ghost:hover {
+  background: var(--surface-2);
+}
+
+/* shared panel look for search/generator sections */
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.panel .sub {
+  margin: 4px 0 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.segmented {
+  display: inline-flex;
+  background: var(--surface-2);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.segmented label {
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.segmented label.on {
+  background: var(--surface-1);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 1px var(--border);
+  font-weight: 600;
+}
+
+.segmented label:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}

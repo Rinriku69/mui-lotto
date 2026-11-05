@@ -1,0 +1,83 @@
+<section class="panel" id="search" aria-labelledby="search-title">
+  <header>
+    <h2 id="search-title">ค้นหาเลข</h2>
+    <p class="sub">กรอกกี่หลักก็ได้ (1–6 หลัก) แล้วดูว่าเคยออกในแต่ละรางวัลกี่ครั้ง เทียบกับจำนวนที่คาดไว้ถ้าการสุ่มยุติธรรม</p>
+  </header>
+
+  <div class="controls">
+    <div class="segmented" role="radiogroup" aria-label="รูปแบบการค้นหา">
+      @for (m of modes; track m.value) {
+        <label [class.on]="searchForm.mode().value() === m.value">
+          <input type="radio" [value]="m.value" [formField]="searchForm.mode" />
+          {{ m.label }}
+        </label>
+      }
+    </div>
+    <input
+      class="query"
+      inputmode="numeric"
+     
+      autocomplete="off"
+      placeholder="เช่น 59"
+      aria-label="เลขที่ต้องการค้นหา"
+      [formField]="searchForm.text"
+    />
+  </div>
+  <p class="hint">{{ hint() }}</p>
+
+  @if (error(); as e) {
+    <p class="error" role="alert">{{ e }}</p>
+  } @else if (stats()[0].total && spaceShare() > 0) {
+    <p class="summary">
+      พบ <strong>{{ totalHits() | number }}</strong> ครั้ง · คาด
+      <strong>{{ totalExpected() | number: '1.0-1' }}</strong> ครั้ง ·
+      เลขสุ่ม 1 ใบจะเข้าเงื่อนไขนี้ {{ spaceShare() | percent: '1.0-4' }}
+    </p>
+
+    <table class="stats">
+      <thead>
+        <tr>
+          <th scope="col">รางวัล</th>
+          <th scope="col" class="num">พบ</th>
+          <th scope="col" class="num">คาด</th>
+          <th scope="col" class="num">พบ/คาด</th>
+          <th scope="col">ออกล่าสุด</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (s of stats(); track s.prize) {
+          <tr>
+            <th scope="row">{{ s.label }}</th>
+            <td class="num"><strong>{{ s.hits | number }}</strong></td>
+            <td class="num">{{ s.expected | number: '1.0-2' }}</td>
+            <td class="num">{{ s.ratio === null ? '–' : (s.ratio | number: '1.2-2') + '×' }}</td>
+            <td>{{ s.lastSeen ?? '–' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <p class="note">
+      "พบ/คาด" ใกล้ 1.00 = ปกติ · ถ้าคาดไว้ต่ำกว่า ~5 ครั้ง ผลที่ได้แกว่งตามความบังเอิญมาก อย่าเพิ่งสรุปจากตัวเลขนี้
+    </p>
+
+    @if (list().length) {
+      <h3 class="list-title">งวดที่ออก (ล่าสุดก่อน)</h3>
+      <ul class="hits">
+        @for (h of list(); track $index) {
+          <li>
+            <span class="date">{{ h.date }}</span>
+            <span class="no">
+              @for (c of h.chars; track $index) {
+                <span [class.lit]="c.hit">{{ c.ch }}</span>
+              }
+            </span>
+            <span class="prize">{{ h.label }}</span>
+          </li>
+        }
+      </ul>
+      @if (truncated()) {
+        <p class="note">แสดง 120 รายการแรกจากทั้งหมด {{ totalHits() | number }}</p>
+      }
+    }
+  }
+</section>
