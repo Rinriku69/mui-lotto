@@ -46,11 +46,15 @@ const MAX_LIST = 120;
 const RATIO_MAX = 1.6;
 const num = new Intl.NumberFormat('en-US');
 
+/**
+ * The Thai label already names the mode, so the hint under the pills only shows an example
+ * (repeating "เลขท้าย · ..." right under a "เลขท้าย" pill would say the same thing twice).
+ */
 const ALL_MODES: { value: SearchMode; label: string; main: string; special: string }[] = [
-  { value: 'anywhere', label: 'ANY', main: 'ตรงไหนก็ได้ · 59 → 159302, 845902', special: 'ตรงไหนก็ได้ · 61 → 612, 361, 61' },
-  { value: 'suffix', label: 'SUFFIX', main: 'เลขท้าย · 59 → xxxx59', special: 'เลขท้าย · 61 → x61, 61' },
-  { value: 'prefix', label: 'PREFIX', main: 'เลขหน้า · 59 → 59xxxx', special: 'เลขหน้า · 61 → 61x, 61' },
-  { value: 'position', label: 'POS', main: 'ตรงตำแหน่ง · ช่องว่าง = หลักไหนก็ได้', special: '' },
+  { value: 'anywhere', label: 'ตรงไหนก็ได้', main: 'เช่น 59 → 159302, 845902', special: 'เช่น 61 → 612, 361, 61' },
+  { value: 'suffix', label: 'เลขท้าย', main: 'เช่น 59 → 123459, 000059', special: 'เช่น 61 → 361, 61' },
+  { value: 'prefix', label: 'เลขหน้า', main: 'เช่น 59 → 591234, 590000', special: 'เช่น 61 → 612, 61' },
+  { value: 'position', label: 'ตรงตามตำแหน่ง', main: 'ช่องว่าง = หลักไหนก็ได้', special: '' },
 ];
 
 @Component({
@@ -100,7 +104,7 @@ export class NumberSearch {
 
   readonly matcher = computed<Matcher | string | null>(() => {
     const q = this.query();
-    if (this.special() && q.mode === 'position') return 'โหมด POS ใช้กับรางวัลที่ 1–5 เท่านั้น เลือก ANY / SUFFIX / PREFIX';
+    if (this.special() && q.mode === 'position') return 'โหมดตรงตามตำแหน่งใช้กับรางวัลที่ 1–5 เท่านั้น เลือก ตรงไหนก็ได้ / เลขท้าย / เลขหน้า';
     return buildMatcher(q.mode, q.text);
   });
   readonly error = computed(() => {

@@ -21,7 +21,7 @@
 
   <div class="flex flex-wrap gap-1" role="radiogroup" aria-label="รูปแบบการค้นหา">
     @for (m of modes(); track m.value) {
-      <label class="pill">
+      <label class="pill text-[13px]">
         <input class="sr-only" type="radio" [value]="m.value" [formField]="searchForm.mode" />
         {{ m.label }}
       </label>
