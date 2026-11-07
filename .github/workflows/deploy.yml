@@ -69,7 +69,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=sha
+            type=sha,priority=300
             type=raw,value=latest
       - name: Build Image + Push to GHCR
         uses: docker/build-push-action@v7
@@ -82,12 +82,23 @@ jobs:
           push: true
 
       - name: SSH into VPS and Deploy
-        if: false
         uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 #v1.2.5
+        env:
+          IMAGE_TAG: ${{ steps.meta.outputs.version }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          fingerprint: ${{ secrets.FINGERPRINT }}
+          envs: IMAGE_TAG,GHCR_USER,GHCR_TOKEN
 
           script: |
-            cd ~/app/
+            set -e
+            trap 'docker logout ghcr.io' EXIT
+            cd ~/app/muilotto
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            docker compose pull
+            docker compose up -d
+            docker image prune -af --filter "label=org.opencontainers.image.source=https://github.com/Rinriku69/mui-lotto"
