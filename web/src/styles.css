@@ -8,7 +8,7 @@
  * In Tailwind v4 the theme lives in CSS: every --color-* here becomes bg-*, text-*, border-*, ring-* ...
  * utilities (e.g. --color-gold -> bg-gold, text-gold), and the same names stay usable as
  * plain CSS variables (var(--color-gold)) for runtime values like heatmap cell colours.
- * Dark-only by design.
+ * These are the Dark values; the Light mode below overrides the same names (Figma: mode "Light").
  */
 @theme {
   --color-page: #0d0e10;
@@ -34,6 +34,29 @@
 @layer base {
   :root {
     color-scheme: dark;
+  }
+
+  /*
+   * Light theme = same token names, different values. Every utility (bg-surface, text-gold...)
+   * and every var(--color-*) reads the variable at runtime, so templates never branch on theme.
+   * The attribute is set by the inline script in index.html and by ThemeService.
+   */
+  :root[data-theme='light'] {
+    color-scheme: light;
+    --color-page: #f3f0e8;
+    --color-surface: #fbfaf6;
+    --color-raised: #eeeae1;
+    --color-ink: #1a1c1f;
+    --color-ink-2: #4a4f57;
+    --color-muted: #676c74;
+    --color-hair: #dcd7cc;
+    /* darker than dark-mode gold: #f2b544 on cream is ~1.9:1, this is ~4.6:1 for gold text */
+    --color-gold: #9a6700;
+    --color-on-gold: #ffffff;
+    --color-critical: #c03a3a;
+    --color-div-neg: #2f6fd1;
+    --color-div-mid: #e4e0d7;
+    --color-div-pos: #cf3b3b;
   }
 
   body {
