@@ -35,9 +35,9 @@
 
   <nav class="flex flex-wrap gap-1" aria-label="ช่วงข้อมูล">
     @for (p of presets; track p.id) {
-      <button type="button" class="pill" [attr.aria-pressed]="activePreset() === p.id" (click)="applyPreset(p)">{{ p.label }}</button>
+      <button type="button" class="pill font-mono text-xs" [attr.aria-pressed]="activePreset() === p.id" (click)="applyPreset(p)">{{ p.label }}</button>
     }
-    <button type="button" class="pill" [attr.aria-pressed]="activePreset() === 'custom'" [attr.aria-expanded]="customOpen()" (click)="toggleCustom()">
+    <button type="button" class="pill text-xs" [attr.aria-pressed]="activePreset() === 'custom'" [attr.aria-expanded]="customOpen()" (click)="toggleCustom()">
       กำหนดเอง ▾
     </button>
   </nav>
