@@ -133,9 +133,9 @@
       </button>
       @if (expanded()) {
         <nav class="ml-auto flex items-center gap-2 font-mono text-xs text-ink-2" aria-label="หน้าผลย้อนหลัง">
-          <button type="button" class="pill" (click)="goPage(-1)" [disabled]="page() === 0">← ใหม่กว่า</button>
+          <button type="button" class="pill text-xs" (click)="goPage(-1)" [disabled]="page() === 0">← ใหม่กว่า</button>
           <span>{{ page() + 1 }} / {{ pageCount() }}</span>
-          <button type="button" class="pill" (click)="goPage(1)" [disabled]="page() >= pageCount() - 1">เก่ากว่า →</button>
+          <button type="button" class="pill text-xs" (click)="goPage(1)" [disabled]="page() >= pageCount() - 1">เก่ากว่า →</button>
         </nav>
       }
     </div>

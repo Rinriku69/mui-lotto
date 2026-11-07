@@ -4,6 +4,15 @@ import { FormField } from '@angular/forms/signals';
 import { LotteryData } from '../lottery/lottery-data';
 import { PRIZES, PRIZE_LABEL, SPECIAL_DIGITS, SPECIAL_KINDS, SPECIAL_LABEL } from '../lottery/lottery.model';
 import { Matcher, SearchMode, buildMatcher, matchShare } from '../lottery/number-pattern';
+import { DigitSlots, SlotMode } from '../shared/digit-slots';
+
+/** Lookup table: search mode -> slot behaviour. A Record makes the compiler check every mode is covered. */
+const SLOT_MODE: Record<SearchMode, SlotMode> = {
+  anywhere: 'grow',
+  suffix: 'end',
+  prefix: 'start',
+  position: 'free',
+};
 
 /** Which tab the inspector serves. The query itself is shared (LotteryData.searchQuery). */
 export type SearchScope = 'main' | 'special';
@@ -37,16 +46,20 @@ const MAX_LIST = 120;
 const RATIO_MAX = 1.6;
 const num = new Intl.NumberFormat('en-US');
 
+/**
+ * The Thai label already names the mode, so the hint under the pills only shows an example
+ * (repeating "เลขท้าย · ..." right under a "เลขท้าย" pill would say the same thing twice).
+ */
 const ALL_MODES: { value: SearchMode; label: string; main: string; special: string }[] = [
-  { value: 'anywhere', label: 'ANY', main: 'ตรงไหนก็ได้ · 59 → 159302, 845902', special: 'ตรงไหนก็ได้ · 61 → 612, 361, 61' },
-  { value: 'suffix', label: 'SUFFIX', main: 'เลขท้าย · 59 → xxxx59', special: 'เลขท้าย · 61 → x61, 61' },
-  { value: 'prefix', label: 'PREFIX', main: 'เลขหน้า · 59 → 59xxxx', special: 'เลขหน้า · 61 → 61x, 61' },
-  { value: 'position', label: 'POS', main: 'ตรงตำแหน่ง · x = หลักไหนก็ได้ เช่น x4xx99', special: '' },
+  { value: 'anywhere', label: 'ตรงไหนก็ได้', main: 'เช่น 59 → 159302, 845902', special: 'เช่น 61 → 612, 361, 61' },
+  { value: 'suffix', label: 'เลขท้าย', main: 'เช่น 59 → 123459, 000059', special: 'เช่น 61 → 361, 61' },
+  { value: 'prefix', label: 'เลขหน้า', main: 'เช่น 59 → 591234, 590000', special: 'เช่น 61 → 612, 61' },
+  { value: 'position', label: 'ตรงตามตำแหน่ง', main: 'ช่องว่าง = หลักไหนก็ได้', special: '' },
 ];
 
 @Component({
   selector: 'app-number-search',
-  imports: [FormField, DecimalPipe],
+  imports: [FormField, DecimalPipe, DigitSlots],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './number-search.html',
   host: { class: 'block' },
@@ -83,17 +96,15 @@ export class NumberSearch {
     return this.special() ? m.special : m.main;
   });
 
-  /** Ghost "x" in front of a suffix query shows which positions are free. */
-  readonly ghost = computed(() => {
-    const { mode, text } = this.query();
-    const free = Math.max(0, (this.special() ? 3 : 6) - text.trim().length);
-    if (!text.trim() || mode === 'position' || mode === 'anywhere') return { before: '', after: '' };
-    return mode === 'suffix' ? { before: 'x'.repeat(free), after: '' } : { before: '', after: 'x'.repeat(free) };
-  });
+  /** Number length this tab searches: 6-digit prizes, or the 3-digit specials (last2 fits inside). */
+  readonly digits = computed(() => (this.special() ? 3 : 6));
+
+  /** How the slot boxes behave per search mode (see Figma "Spec · Search slots by mode"). */
+  readonly slotMode = computed<SlotMode>(() => SLOT_MODE[this.query().mode]);
 
   readonly matcher = computed<Matcher | string | null>(() => {
     const q = this.query();
-    if (this.special() && q.mode === 'position') return 'โหมด POS ใช้กับรางวัลที่ 1–5 เท่านั้น เลือก ANY / SUFFIX / PREFIX';
+    if (this.special() && q.mode === 'position') return 'โหมดตรงตามตำแหน่งใช้กับรางวัลที่ 1–5 เท่านั้น เลือก ตรงไหนก็ได้ / เลขท้าย / เลขหน้า';
     return buildMatcher(q.mode, q.text);
   });
   readonly error = computed(() => {

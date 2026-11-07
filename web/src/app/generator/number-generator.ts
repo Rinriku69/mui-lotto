@@ -3,6 +3,9 @@ import { DecimalPipe } from '@angular/common';
 import { FormField, applyEach, debounce, form, max, maxLength, min } from '@angular/forms/signals';
 import { LotteryData } from '../lottery/lottery-data';
 import { CountOp, DigitRule, GeneratorSpec, SPACE, compileSpec, enumerate, pickRandom } from '../lottery/number-pattern';
+import { DigitSlots } from '../shared/digit-slots';
+
+const MAX_QUANTITY = 20;
 
 interface GeneratorModel extends GeneratorSpec {
   quantity: number;
@@ -15,7 +18,7 @@ interface Picked {
 
 @Component({
   selector: 'app-number-generator',
-  imports: [FormField, DecimalPipe],
+  imports: [FormField, DecimalPipe, DigitSlots],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './number-generator.html',
   host: { class: 'block' },
@@ -37,6 +40,9 @@ export class NumberGenerator {
   protected readonly chipAdd = `${this.chipBase} border-hair cursor-pointer bg-transparent hover:border-muted`;
   protected readonly chipInput = 'rounded bg-transparent px-1 py-0.5 font-mono outline-none placeholder:text-muted';
   protected readonly chipSelect = 'cursor-pointer appearance-none rounded bg-surface px-2 py-0.5 outline-none';
+  protected readonly stepBtn =
+    'cursor-pointer px-3 font-mono text-base text-ink-2 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40';
+  protected readonly maxQuantity = MAX_QUANTITY;
 
   readonly digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
   readonly ops: { value: CountOp; label: string }[] = [
@@ -58,12 +64,15 @@ export class NumberGenerator {
    * repeat them (Angular errors NG8022 if it does - two sources of truth could disagree).
    */
   readonly genForm = form(this.model, (p) => {
-    debounce(p.pattern, 300);
+    // No debounce on pattern: slot edits are discrete (one digit per event) and the roll button
+    // sits right beside them - a pending debounce would let roll() draw from the previous pool.
+    // contains keeps its debounce (free typing; each commit re-enumerates up to 1,000,000
+    // tickets) - roll() flushes it first, see there.
     debounce(p.contains, 300);
     maxLength(p.pattern, 6);
     maxLength(p.contains, 6);
     min(p.quantity, 1);
-    max(p.quantity, 20);
+    max(p.quantity, MAX_QUANTITY);
     // applyEach = run this sub-schema for every item of the rules array
     applyEach(p.rules, (r) => {
       min(r.count, 0);
@@ -87,9 +96,18 @@ export class NumberGenerator {
   readonly poolShare = computed(() => this.poolSize() / SPACE);
   /** Meter width: at least a sliver when the pool is non-empty but tiny, so it never looks broken. */
   readonly meterPct = computed(() => (this.poolSize() ? Math.max(this.poolShare() * 100, 0.4) : 0));
-  readonly quantity = computed(() => Math.min(Math.max(1, Number(this.model().quantity) || 1), 20));
+  readonly quantity = computed(() => clampQuantity(this.model().quantity));
 
   readonly picked = signal<Picked[]>([]);
+
+  /** − / + stepper: always lands inside 1..MAX_QUANTITY, so the schema's min/max never trip. */
+  step(delta: number) {
+    this.model.update((m) => ({ ...m, quantity: clampQuantity(m.quantity + delta) }));
+  }
+
+  clearPattern() {
+    this.model.update((m) => ({ ...m, pattern: '' }));
+  }
 
   addRule() {
     this.model.update((m) => ({ ...m, rules: [...m.rules, { digit: '9', op: 'atLeast', count: 1 } satisfies DigitRule] }));
@@ -100,7 +118,16 @@ export class NumberGenerator {
   }
 
   roll() {
-    const pool = this.pool();
+    // Race: debounce(contains, 300) parks each keystroke in the field's controlValue (what the
+    // <input> shows) and only copies it into model() 300 ms later. pool() is computed from model(),
+    // so a roll inside that window would draw from the *previous* contains value.
+    // markAsTouched() is the framework's own flush: it aborts the pending debounce timer and
+    // commits controlValue -> model synchronously (it's what the input's blur handler calls).
+    // A mouse click normally blurs the input on mousedown (which already flushes), but focus
+    // behaviour on click varies by browser/assistive tech, so roll() flushes explicitly instead of
+    // relying on it. When nothing is pending this is a no-op apart from setting touched.
+    this.genForm.contains().markAsTouched();
+    const pool = this.pool(); // read AFTER the flush, so it sees the committed contains value
     if (!pool?.length) return;
     // Map as a lookup table: number -> times it won (exact match) in the selected range.
     const wins = new Map<string, number>();
@@ -114,4 +141,8 @@ export class NumberGenerator {
     // 'nearest': on desktop the inspector is already on screen, so this is a no-op there
     document.getElementById('search')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+}
+
+function clampQuantity(q: number) {
+  return Math.min(Math.max(1, Number(q) || 1), MAX_QUANTITY);
 }

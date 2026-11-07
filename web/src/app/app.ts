@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChi
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormField, form } from '@angular/forms/signals';
 import { LotteryData } from './lottery/lottery-data';
+import { Theme, ThemeService } from './shared/theme';
 
 interface Preset {
   id: string;
@@ -28,6 +29,11 @@ export class App {
   protected readonly data = inject(LotteryData);
   protected readonly searchForm = this.data.searchForm;
   protected readonly rangeForm = form(this.data.range);
+  protected readonly theme = inject(ThemeService);
+  protected readonly themes: { value: Theme; label: string }[] = [
+    { value: 'dark', label: 'โหมดมืด' },
+    { value: 'light', label: 'โหมดสว่าง' },
+  ];
 
   protected readonly tabs = [
     { path: '/', label: 'รางวัลที่ 1–5', exact: true },

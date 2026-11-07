@@ -7,6 +7,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="ไม่รู้จะซื้อเลขอะไร? ลองสุ่มเลขสลาก 6 หลักจาก pattern ที่ชอบ เช่น ลงท้าย 99 หรือมีเลข 8 อย่างน้อย 2 ตัว แล้วดูสถิติย้อนหลังตั้งแต่ปี 2549 ว่าเลขแบบนั้นเคยออกกี่ครั้ง">
   <meta name="theme-color" content="#0d0e10">
+  <!--
+    Set the theme before the first paint, otherwise a light-mode user sees a dark flash while Angular
+    boots. Same rule as ThemeService: saved choice ('theme' in localStorage) > OS prefers-color-scheme.
+  -->
+  <script>
+    try {
+      var t = localStorage.getItem('theme');
+      if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
   <link rel="icon" type="image/svg+xml" href="logo.svg">
   <!--
     Link previews (LINE, Facebook, X) are built by crawlers that do NOT run JavaScript, so these tags

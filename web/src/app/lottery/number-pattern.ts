@@ -29,8 +29,10 @@ export function buildMatcher(mode: SearchMode, raw: string): Matcher | string | 
   if (!text) return null;
 
   if (mode === 'position') {
-    const p = text.replace(WILDCARD, '?');
-    if (!/^[0-9?]{6}$/.test(p)) return 'โหมดตรงตำแหน่งต้องกรอกครบ 6 ช่อง ใช้ x แทนหลักที่ไม่สนใจ เช่น x4xx99';
+    // Short input is padded with wildcards at the end: "61" means 61xxxx, which is exactly how the
+    // slot boxes display it after switching from another mode.
+    const p = text.replace(WILDCARD, '?').padEnd(6, '?');
+    if (!/^[0-9?]{6}$/.test(p)) return 'โหมดตรงตำแหน่งรับได้ไม่เกิน 6 หลัก ใช้ x แทนหลักที่ไม่สนใจ เช่น x4xx99';
     if (!/[0-9]/.test(p)) return 'ต้องมีตัวเลขอย่างน้อย 1 หลัก';
     const fixed = [...p].map((c) => c !== '?');
     return {

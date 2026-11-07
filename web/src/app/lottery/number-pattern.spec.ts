@@ -20,8 +20,16 @@ describe('buildMatcher', () => {
     expect(m.highlight('041299')).toEqual([false, true, false, false, true, true]);
   });
 
+  it('position mode pads short input with trailing wildcards', () => {
+    const m = ok(buildMatcher('position', '12'));
+    expect(m.key).toBe('position:12????');
+    expect(m.test('123456')).toBe(true);
+    expect(m.test('213456')).toBe(false);
+  });
+
   it('rejects bad input with a message', () => {
-    expect(typeof buildMatcher('position', '12')).toBe('string');
+    expect(typeof buildMatcher('position', '1234567')).toBe('string');
+    expect(typeof buildMatcher('position', '12a')).toBe('string');
     expect(typeof buildMatcher('suffix', '1a')).toBe('string');
     expect(buildMatcher('suffix', '  ')).toBeNull();
   });
