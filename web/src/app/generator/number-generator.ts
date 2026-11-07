@@ -66,6 +66,8 @@ export class NumberGenerator {
   readonly genForm = form(this.model, (p) => {
     // No debounce on pattern: slot edits are discrete (one digit per event) and the roll button
     // sits right beside them - a pending debounce would let roll() draw from the previous pool.
+    // contains keeps its debounce (free typing; each commit re-enumerates up to 1,000,000
+    // tickets) - roll() flushes it first, see there.
     debounce(p.contains, 300);
     maxLength(p.pattern, 6);
     maxLength(p.contains, 6);
@@ -116,7 +118,16 @@ export class NumberGenerator {
   }
 
   roll() {
-    const pool = this.pool();
+    // Race: debounce(contains, 300) parks each keystroke in the field's controlValue (what the
+    // <input> shows) and only copies it into model() 300 ms later. pool() is computed from model(),
+    // so a roll inside that window would draw from the *previous* contains value.
+    // markAsTouched() is the framework's own flush: it aborts the pending debounce timer and
+    // commits controlValue -> model synchronously (it's what the input's blur handler calls).
+    // A mouse click normally blurs the input on mousedown (which already flushes), but focus
+    // behaviour on click varies by browser/assistive tech, so roll() flushes explicitly instead of
+    // relying on it. When nothing is pending this is a no-op apart from setting touched.
+    this.genForm.contains().markAsTouched();
+    const pool = this.pool(); // read AFTER the flush, so it sees the committed contains value
     if (!pool?.length) return;
     // Map as a lookup table: number -> times it won (exact match) in the selected range.
     const wins = new Map<string, number>();
