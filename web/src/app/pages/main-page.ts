@@ -16,9 +16,9 @@ const num = new Intl.NumberFormat('en-US');
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-page-layout>
+      <app-number-generator />
       <app-kpi-row [kpis]="kpis()" />
       <app-heatmap-panel />
-      <app-number-generator />
       <app-number-search aside scope="main" />
     </app-page-layout>
   `,
