@@ -4,11 +4,28 @@
     <h2 id="gen-title" class="text-xl font-semibold">สุ่มเลข 6 หลัก</h2>
   </div>
 
+  <!-- Primary row: the position pattern is what most people use, so the roll button sits right next to it. -->
   <div class="flex flex-wrap items-center gap-2">
-    <label [class]="chip">
-      <span>ตำแหน่ง</span>
-      <input [class]="chipInput + ' w-[8.5ch] tracking-[0.15em]'" placeholder="xxxxxx" autocomplete="off" spellcheck="false" [formField]="genForm.pattern" />
-    </label>
+    <div class="inline-flex items-center gap-2.5 rounded-lg border border-hair bg-raised py-1.5 pr-2.5 pl-3.5">
+      <span class="text-sm font-medium" aria-hidden="true">ตำแหน่ง</span>
+      <app-digit-slots mode="free" label="ตำแหน่งเลข 6 หลัก" describedBy="gen-pattern-hint" [formField]="genForm.pattern" />
+      <button type="button" class="cursor-pointer text-[13px] text-muted hover:text-ink disabled:cursor-default disabled:opacity-40" [disabled]="!model().pattern" (click)="clearPattern()">
+        ล้าง
+      </button>
+    </div>
+
+    <button type="button" class="btn-gold" (click)="roll()" [disabled]="!poolSize()">สุ่ม {{ quantity() }} เลข</button>
+
+    <div class="inline-flex h-[42px] items-stretch rounded-lg border border-hair bg-raised" role="group" aria-label="จำนวนเลขที่จะสุ่ม">
+      <button type="button" [class]="stepBtn" (click)="step(-1)" [disabled]="quantity() <= 1" aria-label="ลดจำนวน">−</button>
+      <output class="flex w-7 items-center justify-center font-mono text-base font-bold" aria-live="polite">{{ quantity() }}</output>
+      <button type="button" [class]="stepBtn" (click)="step(1)" [disabled]="quantity() >= maxQuantity" aria-label="เพิ่มจำนวน">+</button>
+    </div>
+  </div>
+  <p id="gen-pattern-hint" class="-mt-2 text-xs text-muted">ช่องว่าง = เลขอะไรก็ได้</p>
+
+  <!-- Secondary conditions: optional, so they come after the primary action. -->
+  <div class="flex flex-wrap items-center gap-2">
     <label [class]="chip">
       <span>มีชุดเลข</span>
       <input [class]="chipInput + ' w-[5ch] tracking-[0.15em]'" inputmode="numeric" placeholder="…" autocomplete="off" [formField]="genForm.contains" />
@@ -52,14 +69,8 @@
     </div>
   }
 
+  @if (picked().length) {
   <div class="flex flex-wrap items-stretch gap-2.5">
-    <div class="flex flex-col justify-center gap-1.5">
-      <button type="button" class="btn-gold" (click)="roll()" [disabled]="!poolSize()">สุ่ม {{ quantity() }} เลข</button>
-      <label class="flex items-center gap-1.5 text-xs text-muted">
-        จำนวน
-        <input type="number" class="w-16 rounded-md border border-hair bg-raised px-1.5 py-0.5 font-mono text-xs" [formField]="genForm.quantity" aria-label="จำนวนเลขที่จะสุ่ม" />
-      </label>
-    </div>
     @for (p of picked(); track p.number) {
       <button
         type="button"
@@ -72,6 +83,7 @@
       </button>
     }
   </div>
+  }
 
   <p class="text-xs text-muted">
     ทุกเลขมีโอกาสถูกรางวัลที่ 1 เท่ากันคือ 1 ใน 1,000,000 เงื่อนไขแค่เลือกรูปแบบเลข ไม่ได้เพิ่มโอกาสถูกรางวัล · กดที่เลขเพื่อดูสถิติ
