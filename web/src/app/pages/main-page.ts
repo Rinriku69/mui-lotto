@@ -15,7 +15,10 @@ const num = new Intl.NumberFormat('en-US');
   imports: [PageLayout, KpiRow, HeatmapPanel, NumberGenerator, NumberSearch],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-page-layout>
+    <app-page-layout
+      heading="สุ่มเลขหวย 6 ตัวตามเงื่อนไข + สถิติหวยย้อนหลัง"
+      lead="กำหนดเงื่อนไขที่ชอบ เช่น ลงท้าย 99 หรือมีเลข 8 อย่างน้อย 2 ตัว แล้วสุ่มเลขสลากที่เข้าเงื่อนไข พร้อมดูว่าเลขแบบนั้นเคยออกรางวัลที่ 1–5 กี่ครั้งตั้งแต่ปี 2549 · ทุกเลขมีโอกาสถูกเท่ากัน ไม่ใช่การทำนายผล"
+    >
       <app-number-generator />
       <app-kpi-row [kpis]="kpis()" />
       <app-heatmap-panel />
