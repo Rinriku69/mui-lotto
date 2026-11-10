@@ -95,7 +95,7 @@ export class DigitSlots implements FormValueControl<string> {
 
   protected readonly indexes = computed(() => Array.from({ length: this.length() }, (_, i) => i));
   protected readonly box = computed(() =>
-    (this.size() === 'lg' ? 'h-[58px] w-12 rounded-lg text-[28px]' : 'h-11 w-[34px] rounded-md text-[22px]') +
+    (this.size() === 'lg' ? 'h-[54px] w-11 rounded-lg text-[26px] sm:h-[58px] sm:w-12 sm:text-[28px]' : 'h-11 w-[34px] rounded-md text-[22px]') +
     ' flex items-center justify-center border bg-surface text-center font-mono',
   );
 
