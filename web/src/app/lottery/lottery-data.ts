@@ -10,6 +10,10 @@ export interface DateRange {
   to: string;
 }
 
+/** 'all' or the last N years, counted back from the newest draw; 'custom' = the from/to inputs. */
+export type RangePreset = 'all' | '10y' | '5y' | '1y' | 'custom';
+const PRESET_YEARS: Record<Exclude<RangePreset, 'custom'>, number | null> = { all: null, '10y': 10, '5y': 5, '1y': 1 };
+
 export interface SearchQuery {
   mode: SearchMode;
   text: string;
@@ -30,6 +34,13 @@ export class LotteryData {
   readonly lastDate = computed(() => this.allDraws().at(-1)?.date ?? '');
 
   readonly range = signal<DateRange>({ from: '', to: '' });
+  /**
+   * Which range button is lit. Kept here (not in the picker) because the picker renders twice:
+   * in the desktop sidebar and inside the page on mobile - both must show the same choice.
+   */
+  readonly rangePreset = signal<RangePreset>('all');
+  /** The custom from/to inputs; one form for both picker instances, like searchForm. */
+  readonly rangeForm = form(this.range);
 
   /** Search state lives here so the command bar, the inspector and the generator share it. */
   readonly searchQuery = signal<SearchQuery>({ mode: 'suffix', text: '' });
@@ -44,6 +55,18 @@ export class LotteryData {
     debounce(p.text, 250);
     maxLength(p.text, 6);
   });
+
+  applyPreset(p: Exclude<RangePreset, 'custom'>) {
+    this.rangePreset.set(p);
+    const years = PRESET_YEARS[p];
+    if (years === null) {
+      this.range.set({ from: '', to: '' });
+      return;
+    }
+    const last = new Date(this.lastDate());
+    last.setFullYear(last.getFullYear() - years);
+    this.range.set({ from: last.toISOString().slice(0, 10), to: '' });
+  }
 
   readonly draws = computed(() => {
     const { from, to } = this.range();
