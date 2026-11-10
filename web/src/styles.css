@@ -21,6 +21,8 @@
   --color-hair: #2a2d32;
   --color-gold: #f2b544;
   --color-on-gold: #17130a;
+  /* tinted ground behind the generator and the active nav item (Figma accent/soft) */
+  --color-gold-soft: #2a2519;
   --color-critical: #e66767;
   /* diverging heatmap: blue (fewer than expected) <-> gray <-> red (more than expected) */
   --color-div-neg: #3987e5;
@@ -53,6 +55,7 @@
     /* darker than dark-mode gold: #f2b544 on cream is ~1.9:1, this is ~4.6:1 for gold text */
     --color-gold: #9a6700;
     --color-on-gold: #ffffff;
+    --color-gold-soft: #f3ead6;
     --color-critical: #c03a3a;
     --color-div-neg: #2f6fd1;
     --color-div-mid: #e4e0d7;
@@ -77,7 +80,7 @@
  * as real utilities, so they work with variants (hover:, md: ...) like any built-in class.
  */
 @utility panel {
-  @apply rounded-xl border border-hair bg-surface p-[22px];
+  @apply rounded-[14px] border border-hair bg-surface p-4 sm:p-[22px];
 }
 
 @utility eyebrow {
@@ -94,6 +97,21 @@
   @apply relative inline-flex cursor-pointer items-center rounded-full disabled:cursor-not-allowed disabled:opacity-40 border border-transparent px-3 py-[5px] text-ink-2 hover:text-ink;
   @apply aria-pressed:border-gold aria-pressed:bg-raised aria-pressed:font-medium aria-pressed:text-gold;
   @apply has-checked:border-gold has-checked:bg-raised has-checked:font-medium has-checked:text-gold;
+  @apply has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-gold;
+}
+
+/*
+ * Segmented control (Figma Segment/On + Off): a sunken track whose selected item is a raised chip.
+ * `segmented` is the track, `seg` each option - a button with aria-pressed, or a label around a radio.
+ */
+@utility segmented {
+  @apply flex gap-0.5 rounded-[9px] bg-raised p-[3px];
+}
+
+@utility seg {
+  @apply flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[7px] px-2 py-1.5 text-center font-medium whitespace-nowrap text-ink-2 hover:text-ink;
+  @apply aria-pressed:bg-surface aria-pressed:font-semibold aria-pressed:text-ink aria-pressed:shadow-sm;
+  @apply has-checked:bg-surface has-checked:font-semibold has-checked:text-ink has-checked:shadow-sm;
   @apply has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-gold;
 }
 

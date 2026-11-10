@@ -6,7 +6,8 @@ import { CellStat, GridStats } from '../lottery/stats';
  * Heatmap grid, two flavours:
  *  - 'digit': rows = digit 0–9, columns = position (หลัก). Cells are unlabeled.
  *  - 'pair' : rows = tens, columns = units (00–99). Each cell shows its 2-digit number.
- * Colour = z-score on a fixed diverging scale; gold ring = |z| >= 2.
+ * Colour = z-score on a fixed diverging scale; ink outline = |z| >= 2 (neutral on purpose: a gold
+ * ring read as "hot number"). Gold marks the active cell - the visitor's own pick.
  * Hover/focus is reported up via `inspect` so the parent can show one shared readout.
  */
 @Component({

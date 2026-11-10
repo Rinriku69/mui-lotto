@@ -1,85 +1,126 @@
-<header class="sticky top-0 z-10 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-hair bg-surface px-8 py-3.5">
-  <a routerLink="/" class="flex items-center gap-2.5" aria-label="Mui Lotto หน้าแรก">
-    <img src="logo.svg" alt="" width="30" height="30" class="size-[30px]" />
-    <span class="text-base font-semibold">Mui Lotto</span>
-  </a>
+<div class="min-h-screen lg:grid lg:grid-cols-[232px_minmax(0,1fr)]">
+  <!-- ---------- Desktop sidebar (Figma C/B Sidebar) ---------- -->
+  <aside class="sticky top-0 hidden h-screen flex-col gap-1.5 overflow-y-auto border-r border-hair bg-surface px-[18px] py-[22px] lg:flex">
+    <a routerLink="/" class="mb-[18px] flex items-center gap-2.5 pl-1.5" aria-label="Mui Lotto หน้าแรก">
+      <img src="logo.svg" alt="" width="32" height="32" class="size-8" />
+      <span class="flex flex-col">
+        <span class="text-[17px] leading-tight font-bold">Mui Lotto</span>
+        <span class="text-[11px] text-muted">สุ่มเลขหวย · สถิติย้อนหลัง</span>
+      </span>
+    </a>
 
-  <nav class="flex items-center gap-5" aria-label="แท็บ">
-    @for (t of tabs; track t.path) {
-      <a
-        [routerLink]="t.path"
-        routerLinkActive
-        [routerLinkActiveOptions]="{ exact: t.exact }"
-        ariaCurrentWhenActive="page"
-        class="border-b-2 border-transparent px-1 py-1.5 text-sm text-ink-2 hover:text-ink aria-[current=page]:border-gold aria-[current=page]:font-semibold aria-[current=page]:text-ink"
-      >
-        {{ t.label }}
-      </a>
-    }
-  </nav>
+    <nav class="flex flex-col gap-1" aria-label="หน้า">
+      @for (t of tabs; track t.path) {
+        <a
+          [routerLink]="t.path"
+          routerLinkActive
+          [routerLinkActiveOptions]="{ exact: t.exact }"
+          ariaCurrentWhenActive="page"
+          class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-ink-2 hover:text-ink aria-[current=page]:bg-gold-soft aria-[current=page]:font-semibold aria-[current=page]:text-gold"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          {{ t.label }}
+        </a>
+      }
+    </nav>
 
-  <label class="flex min-w-[240px] flex-1 items-center gap-3 rounded-lg border border-hair bg-raised px-3.5 py-2 focus-within:border-gold">
-    <span class="text-base text-muted" aria-hidden="true">⌕</span>
-    <input
-      #cmd
-      class="flex-1 bg-transparent font-mono tracking-[0.06em] outline-none placeholder:font-sans placeholder:tracking-normal placeholder:text-muted"
-      inputmode="numeric"
-      autocomplete="off"
-      spellcheck="false"
-      placeholder="ค้นหาเลข…  เช่น 61, 888, x4xx99"
-      aria-label="ค้นหาเลข"
-      [formField]="searchForm.text"
-    />
-    <kbd class="rounded border border-hair px-1.5 font-mono text-[11px] text-muted" aria-hidden="true">/</kbd>
-  </label>
+    <section class="mt-[22px] flex flex-col gap-2" aria-labelledby="range-title">
+      <h2 id="range-title" class="text-xs font-semibold text-ink-2">ช่วงข้อมูล</h2>
+      <app-range-picker />
+    </section>
 
-  <nav class="flex flex-wrap gap-1" aria-label="ช่วงข้อมูล">
-    @for (p of presets; track p.id) {
-      <button type="button" class="pill font-mono text-xs" [attr.aria-pressed]="activePreset() === p.id" (click)="applyPreset(p)">{{ p.label }}</button>
-    }
-    <button type="button" class="pill text-xs" [attr.aria-pressed]="activePreset() === 'custom'" [attr.aria-expanded]="customOpen()" (click)="toggleCustom()">
-      กำหนดเอง ▾
-    </button>
-  </nav>
+    <div class="flex-1"></div>
 
-  <span class="font-mono text-[11px] text-muted">● SYNC {{ data.lastDate() || '—' }}</span>
-
-  <!-- Theme switch (Figma Toggle/Theme): a 2-option radio group, so the current mode is always visible. -->
-  <div class="inline-flex gap-0.5 rounded-full border border-hair bg-raised p-0.5" role="radiogroup" aria-label="ธีมสี">
-    @for (t of themes; track t.value) {
-      <label
-        class="flex cursor-pointer items-center rounded-full border border-transparent px-2 py-1 text-muted hover:text-ink has-checked:border-gold has-checked:bg-surface has-checked:text-gold has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-gold"
-        [title]="t.label"
-      >
-        <input class="sr-only" type="radio" name="theme" [value]="t.value" [checked]="theme.theme() === t.value" (change)="theme.set(t.value)" [attr.aria-label]="t.label" />
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          @if (t.value === 'dark') {
-            <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z" />
-          } @else {
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4" />
-          }
-        </svg>
-      </label>
-    }
-  </div>
-
-  @if (customOpen()) {
-    <div class="flex basis-full justify-end gap-4 text-xs text-ink-2" role="group" aria-label="ช่วงวันที่">
-      <label class="flex items-center gap-1.5">ตั้งแต่ <input type="date" [formField]="rangeForm.from" /></label>
-      <label class="flex items-center gap-1.5">ถึง <input type="date" [formField]="rangeForm.to" /></label>
+    <!-- Theme switch (Figma Toggle/Theme): a 2-option radio group, so the current mode is always visible. -->
+    <div class="segmented" role="radiogroup" aria-label="ธีมสี">
+      @for (t of themes; track t.value) {
+        <label class="seg text-[13px]">
+          <input class="sr-only" type="radio" name="theme" [value]="t.value" [checked]="theme.theme() === t.value" (change)="theme.set(t.value)" />
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            @if (t.value === 'dark') {
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+            } @else {
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+            }
+          </svg>
+          {{ t.label }}
+        </label>
+      }
     </div>
-  }
-</header>
+    <p class="mt-1.5 text-xs leading-normal text-ink-2">สถิติย้อนหลังไม่ได้ทำนายผล ทุกเลขมีโอกาสถูกเท่ากัน · ข้อมูลจาก GLO + thai-lotto-archive</p>
+  </aside>
 
-@if (data.file.isLoading()) {
-  <p class="p-8 text-ink-2">กำลังโหลดข้อมูล…</p>
-} @else if (data.file.error()) {
-  <p class="p-8 text-critical">โหลด data/draws.json ไม่สำเร็จ ให้รัน <code>python scripts/export_web.py</code> ก่อน</p>
-} @else {
-  <router-outlet />
+  <div class="min-w-0">
+    <!-- ---------- Mobile top bar ---------- -->
+    <header class="sticky top-0 z-10 flex flex-col gap-3 border-b border-hair bg-page px-4 pt-3 pb-3 lg:hidden">
+      <div class="flex items-center gap-2.5">
+        <a routerLink="/" class="flex flex-1 items-center gap-2.5" aria-label="Mui Lotto หน้าแรก">
+          <img src="logo.svg" alt="" width="28" height="28" class="size-7" />
+          <span class="text-base font-bold">Mui Lotto</span>
+        </a>
+        <button
+          type="button"
+          class="grid size-10 cursor-pointer place-items-center rounded-[10px] border border-hair text-ink"
+          [attr.aria-label]="theme.theme() === 'dark' ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'"
+          (click)="theme.set(theme.theme() === 'dark' ? 'light' : 'dark')"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            @if (theme.theme() === 'dark') {
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+            } @else {
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+            }
+          </svg>
+        </button>
+      </div>
+      <nav class="segmented" aria-label="หน้า">
+        @for (t of tabs; track t.path) {
+          <a
+            [routerLink]="t.path"
+            routerLinkActive
+            [routerLinkActiveOptions]="{ exact: t.exact }"
+            ariaCurrentWhenActive="page"
+            class="seg text-[13px] aria-[current=page]:bg-surface aria-[current=page]:font-semibold aria-[current=page]:text-ink aria-[current=page]:shadow-sm"
+          >
+            {{ t.label }}
+          </a>
+        }
+      </nav>
+    </header>
 
-  <footer class="mx-auto max-w-[1600px] px-8 pt-4 pb-7 text-[11px] text-muted">
-    การออกรางวัลแต่ละงวดเป็นอิสระต่อกัน สถิติย้อนหลังใช้ตรวจความยุติธรรม ไม่ใช่ทำนายงวดถัดไป · ข้อมูล GLO + thai-lotto-archive
-  </footer>
-}
+    @if (data.file.isLoading()) {
+      <!-- Skeleton in the page's own shape (no spinner): the layout doesn't jump when data lands. -->
+      <div class="flex animate-pulse flex-col gap-5 px-4 pt-6 sm:px-7" role="status" aria-label="กำลังโหลดข้อมูล">
+        <div class="h-7 w-2/3 max-w-[480px] rounded-lg bg-raised"></div>
+        <div class="h-[280px] rounded-[14px] bg-raised"></div>
+        <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+          <div class="h-24 rounded-xl bg-raised"></div>
+          <div class="h-24 rounded-xl bg-raised"></div>
+          <div class="h-24 rounded-xl bg-raised max-md:hidden"></div>
+        </div>
+      </div>
+    } @else if (data.file.error()) {
+      <div class="mx-4 mt-8 flex flex-col items-center gap-2 rounded-[14px] border border-hair bg-surface px-6 py-10 text-center sm:mx-7" role="alert">
+        <svg class="text-critical" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2.2-1.6M12 20h.01" />
+        </svg>
+        <p class="text-[15px] font-semibold">โหลดสถิติย้อนหลังไม่สำเร็จ</p>
+        <p class="text-xs text-ink-2">ตรวจการเชื่อมต่อแล้วลองอีกครั้ง</p>
+        <!-- httpResource.reload() re-runs the same GET; the @if above flips back to the skeleton -->
+        <button type="button" class="mt-1 cursor-pointer rounded-[9px] border border-hair bg-raised px-4 py-2 text-[13px] font-semibold hover:border-muted" (click)="data.file.reload()">
+          ลองใหม่
+        </button>
+      </div>
+    } @else {
+      <router-outlet />
+    }
+
+    <footer class="px-4 pt-2 pb-7 text-xs text-ink-2 lg:hidden">
+      สถิติย้อนหลังไม่ได้ทำนายผล ทุกเลขมีโอกาสถูกเท่ากัน · ข้อมูลจาก GLO + thai-lotto-archive
+    </footer>
+  </div>
+</div>

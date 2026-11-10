@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormField } from '@angular/forms/signals';
-import { LotteryData } from '../lottery/lottery-data';
+import { LotteryData, RangePreset } from '../lottery/lottery-data';
 import { PRIZES, PRIZE_LABEL, SPECIAL_DIGITS, SPECIAL_KINDS, SPECIAL_LABEL } from '../lottery/lottery.model';
 import { Matcher, SearchMode, buildMatcher, matchShare } from '../lottery/number-pattern';
 import { DigitSlots, SlotMode } from '../shared/digit-slots';
+import { thaiDate } from '../shared/thai-date';
 
 /** Lookup table: search mode -> slot behaviour. A Record makes the compiler check every mode is covered. */
 const SLOT_MODE: Record<SearchMode, SlotMode> = {
@@ -40,6 +41,8 @@ interface GroupStat extends Group {
   barPct: number;
 }
 
+const RANGE_LABEL: Record<RangePreset, string> = { all: 'ทั้งหมด', '10y': '10 ปีล่าสุด', '5y': '5 ปีล่าสุด', '1y': '1 ปีล่าสุด', custom: 'กำหนดเอง' };
+
 const RECENT = 7;
 const MAX_LIST = 120;
 /** Bullet chart scale: ratio 0..1.6, so the "expected" tick (ratio 1) sits at 62.5%. */
@@ -69,7 +72,7 @@ export class NumberSearch {
   protected readonly searchForm = this.data.searchForm;
 
   readonly scope = input<SearchScope>('main');
-  private readonly special = computed(() => this.scope() === 'special');
+  protected readonly special = computed(() => this.scope() === 'special');
 
   /** POS mode needs 6-digit tickets, so the special tab doesn't offer it. */
   readonly modes = computed(() => ALL_MODES.filter((m) => !this.special() || m.value !== 'position'));
@@ -154,8 +157,23 @@ export class NumberSearch {
   readonly summary = computed(() => [
     { label: 'ครั้งที่พบ', value: num.format(this.totalHits()), gold: true },
     { label: 'ครั้งที่คาด', value: this.totalExpected().toFixed(1), gold: false },
-    { label: 'พบ / คาด', value: `${this.totalRatio().toFixed(2)}×`, gold: false },
+    { label: 'พบ / คาด', value: this.totalHits() || this.totalExpected() >= 1 ? `${this.totalRatio().toFixed(2)}×` : '—', gold: false },
   ]);
+
+  /** Which slice of history the numbers come from - the range control may be far away (mobile). */
+  readonly rangeLabel = computed(() => RANGE_LABEL[this.data.rangePreset()]);
+  readonly drawCount = computed(() => this.data.draws().length);
+
+  modeLabel(m: SearchMode) {
+    return ALL_MODES.find((x) => x.value === m)!.label;
+  }
+
+  /** "+27%" / "−11%": the bar's direction in text too, so colour is never the only signal. */
+  pct(ratio: number | null) {
+    if (ratio === null) return '—';
+    const p = Math.round((ratio - 1) * 100);
+    return p > 0 ? `+${p}%` : p < 0 ? `−${-p}%` : '0%';
+  }
   readonly lowExpected = computed(() => this.stats().some((s) => s.expected > 0 && s.expected < 5));
 
   readonly list = computed(() => {
@@ -166,7 +184,7 @@ export class NumberSearch {
       .slice(0, this.expanded() ? MAX_LIST : RECENT)
       .map((h) => {
         const lit = m.highlight(h.number);
-        return { ...h, label: labels.get(h.group) ?? '', chars: [...h.number].map((ch, i) => ({ ch, hit: lit[i] })) };
+        return { ...h, thaiDate: thaiDate(h.date), label: labels.get(h.group) ?? '', chars: [...h.number].map((ch, i) => ({ ch, hit: lit[i] })) };
       });
   });
   readonly canExpand = computed(() => this.hits().length > RECENT);

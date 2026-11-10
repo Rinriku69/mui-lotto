@@ -23,6 +23,9 @@ export class HeatmapPanel {
   protected readonly prizes = PRIZES;
   protected readonly prizeLabel = PRIZE_LABEL;
 
+  /** The one prize shown on phones (all five from sm up). */
+  protected readonly mobilePrize = signal(1);
+
   /** One readout for all five grids, so hovering any cell explains it in the same place. */
   protected readonly hovered = signal<Hovered | null>(null);
   protected readonly hoveredExpected = computed(() => {
