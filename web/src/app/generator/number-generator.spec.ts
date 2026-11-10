@@ -13,9 +13,14 @@ describe('NumberGenerator.roll', () => {
     return TestBed.runInInjectionContext(() => new NumberGenerator());
   };
 
+  it('starts with no extra condition, so the first roll draws from every ticket', () => {
+    const gen = create();
+    expect(gen.model().rules).toEqual([]);
+    expect(gen.poolSize()).toBe(1_000_000);
+  });
+
   it('flushes a still-debounced contains value before drawing', () => {
     const gen = create();
-    gen.model.update((m) => ({ ...m, rules: [] }));
 
     // What the [formField] directive does on each keystroke: write the raw control value.
     gen.genForm.contains().controlValue.set('123');

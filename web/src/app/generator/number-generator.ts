@@ -55,7 +55,8 @@ export class NumberGenerator {
   readonly model = signal<GeneratorModel>({
     pattern: '',
     contains: '',
-    rules: [{ digit: '4', op: 'atLeast', count: 2 }],
+    // Start with no extra condition: a preset rule silently shrank the first roll's pool to ~11%.
+    rules: [],
     quantity: 5,
   });
 
