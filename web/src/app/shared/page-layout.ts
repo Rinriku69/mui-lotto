@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { NextDraw } from './next-draw';
 import { RangePicker } from './range-picker';
 
 /**
@@ -17,7 +18,7 @@ import { RangePicker } from './range-picker';
  */
 @Component({
   selector: 'app-page-layout',
-  imports: [RangePicker],
+  imports: [RangePicker, NextDraw],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
@@ -26,7 +27,7 @@ import { RangePicker } from './range-picker';
         <h1 class="text-xl font-bold text-ink sm:text-[26px] sm:leading-tight">{{ heading() }}</h1>
         <p class="mt-1 max-w-[80ch] text-sm text-ink-2">{{ lead() }}</p>
       </div>
-      <ng-content select="[badge]" />
+      <app-next-draw />
     </header>
     <main
       class="mx-auto grid max-w-[1600px] gap-5 px-4 pt-5 pb-8 [grid-template-areas:'top'_'aside'_'rest'] sm:px-7 xl:grid-cols-[minmax(0,1fr)_380px] xl:grid-rows-[auto_1fr] xl:[grid-template-areas:'top_aside'_'rest_aside']"

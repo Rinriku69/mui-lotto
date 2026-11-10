@@ -29,20 +29,21 @@ const num = new Intl.NumberFormat('en-US');
 export class MainPage {
   private readonly data = inject(LotteryData);
 
-  /** The four summary tiles, all derived from the selected date range. */
+  /** The three summary tiles, all derived from the selected date range. */
   protected readonly kpis = computed<Kpi[]>(() => {
     const draws = this.data.draws();
     const from = draws[0]?.date;
     const to = draws.at(-1)?.date;
+    const beyond = this.data.beyond2Total();
+    const expected = this.data.beyond2Expected;
     return [
-      { label: 'งวดในช่วงที่เลือก', value: num.format(draws.length), sub: `${thaiDate(from)} → ${thaiDate(to)}` },
-      { label: 'เลขที่ออกทั้งหมด', value: num.format(this.data.entries().length), sub: 'รางวัลที่ 1–5' },
+      { label: 'งวดในช่วงที่เลือก', value: num.format(draws.length), sub: `${thaiDate(from)} – ${thaiDate(to)}` },
+      { label: 'รางวัลที่ 1 ล่าสุด', value: draws.at(-1)?.prizes[0][0] ?? '–', sub: `งวด ${thaiDate(to)}` },
       {
-        label: 'ช่องที่เกิน ±2σ',
-        value: `${this.data.beyond2Total()} / 300`,
-        sub: `สุ่มยุติธรรมคาด ~${this.data.beyond2Expected.toFixed(1)}`,
+        label: 'ช่องที่ห่างจากค่าคาดเกิน ±2σ',
+        value: `${beyond} / 300`,
+        sub: `สุ่มล้วนคาดไว้ ~${Math.round(expected)} ช่อง · ${beyond <= expected * 1.5 ? 'อยู่ในเกณฑ์ปกติ' : 'มากกว่าที่คาด'}`,
       },
-      { label: 'งวดล่าสุด · รางวัลที่ 1', value: draws.at(-1)?.prizes[0][0] ?? '–', sub: thaiDate(to), gold: true },
     ];
   });
 }

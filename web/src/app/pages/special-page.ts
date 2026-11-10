@@ -31,10 +31,10 @@ export class SpecialPage {
     const s = last?.special;
     const l2 = this.data.last2Stats();
     return [
-      { label: 'เลขท้าย 2 ตัว · งวดล่าสุด', value: s?.last2[0] ?? '–', sub: thaiDate(last?.date), gold: true },
+      { label: 'เลขท้าย 2 ตัว · งวดล่าสุด', value: s?.last2[0] ?? '–', sub: `งวด ${thaiDate(last?.date)}` },
       { label: 'เลขหน้า 3 ตัว · งวดล่าสุด', value: s?.front3.join('  ') || '–', sub: `${this.data.front3Draws()} งวดที่มีรางวัลนี้` },
       { label: 'เลขท้าย 3 ตัว · งวดล่าสุด', value: s?.last3.join('  ') || '–', sub: `${this.data.draws().length} งวด · ${this.data.specialByKind().last3.length.toLocaleString('en-US')} เลข` },
-      { label: 'ช่องที่เกิน ±2σ (00–99)', value: `${l2.beyond2} / 100`, sub: `สุ่มยุติธรรมคาด ~${(100 * BEYOND2_SHARE).toFixed(1)}` },
+      { label: 'ช่องที่เกิน ±2σ (00–99)', value: `${l2.beyond2} / 100`, sub: `สุ่มล้วนคาดไว้ ~${(100 * BEYOND2_SHARE).toFixed(1)} ช่อง` },
     ];
   });
 
