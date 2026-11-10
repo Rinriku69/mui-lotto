@@ -68,10 +68,11 @@ export class SpecialPage {
         .slice(0, 4)
         .join(', ');
     return [
-      { k: 'ออกบ่อยสุด', v: `${names(max)} · ${max} ครั้ง` },
-      { k: 'ออกน้อยสุด', v: `${names(min)} · ${min} ครั้ง` },
-      { k: 'ค่าคาดต่อเลข', v: `${s.expected.toFixed(2)} ครั้ง` },
-      { k: 'ช่องเกิน ±2σ', v: `${s.beyond2} จาก 100 · คาด ~${(100 * BEYOND2_SHARE).toFixed(1)}` },
+      { k: 'ออกบ่อยที่สุด', v: `${names(max)} · ${max} ครั้ง` },
+      { k: 'ออกน้อยที่สุด', v: `${names(min)} · ${min} ครั้ง` },
+      // the band right under the extremes, so "most / least" never reads as hot / cold numbers
+      { k: 'ช่วงปกติถ้าสุ่มล้วน', v: `${this.normalBand()} ครั้ง (คาด ${s.expected.toFixed(1)})` },
+      { k: 'ช่องที่เกิน ±2σ', v: `${s.beyond2} จาก 100 · คาด ~${(100 * BEYOND2_SHARE).toFixed(1)}` },
     ];
   });
 

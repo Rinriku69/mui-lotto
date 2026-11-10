@@ -8,9 +8,8 @@
   <section class="panel" aria-labelledby="l2-title">
     <header class="mb-[18px] flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p class="eyebrow">LAST 2 DIGITS · 00–99</p>
-        <h2 id="l2-title" class="text-xl font-semibold">เลขท้าย 2 ตัว</h2>
-        <p class="mt-1 text-[13px] text-ink-2">แถว = หลักสิบ · คอลัมน์ = หลักหน่วย · ตัวเลขในช่อง = เลขท้าย 2 ตัว</p>
+        <h2 id="l2-title" class="text-base font-semibold">เลขท้าย 2 ตัว 00–99 ออกกี่ครั้ง เทียบกับที่ควรเป็น</h2>
+        <p class="mt-1 text-xs text-ink-2">แถว = หลักสิบ · คอลัมน์ = หลักหน่วย · วางเมาส์หรือแตะช่องเพื่อดูรายละเอียด</p>
       </div>
       <app-heat-legend />
     </header>
@@ -25,13 +24,15 @@
       />
 
       <div class="flex flex-col gap-4">
-        <div class="flex min-h-[124px] flex-col gap-2 rounded-[10px] bg-raised p-4" aria-live="polite">
+        <div class="flex min-h-[124px] flex-col gap-1.5 rounded-[10px] p-4" [class]="selectedPair() ? 'bg-gold-soft' : 'bg-raised'" aria-live="polite">
           @if (selectedPair(); as c) {
-            <strong class="text-base font-semibold">เลขท้าย {{ c.digit }}{{ c.pos }}</strong>
-            <span class="font-mono text-sm text-ink-2">
-              {{ c.count }} ครั้ง · คาด {{ data.last2Stats().expected | number: '1.1-1' }} · {{ c.z >= 0 ? '+' : '' }}{{ c.z | number: '1.1-1' }}σ
+            <span class="flex items-baseline gap-2 text-[13px] text-ink-2">
+              เลขท้าย <strong class="font-mono text-[26px] font-bold text-gold">{{ c.digit }}{{ c.pos }}</strong>
             </span>
-            <p class="text-[13px] text-ink-2">
+            <span class="text-[13px] font-medium">
+              ออก {{ c.count }} ครั้ง · คาด {{ data.last2Stats().expected | number: '1.1-1' }} · ห่างจากค่าคาด {{ c.z >= 0 ? '+' : '' }}{{ c.z | number: '1.1-1' }}σ
+            </span>
+            <p class="text-xs text-ink-2">
               @if (c.z > -2 && c.z < 2) {
                 อยู่ในช่วงปกติ ถ้าสุ่มยุติธรรม เลขท้าย 2 ตัวแต่ละเลขจะออกได้ราว {{ normalBand() }} ครั้งใน {{ data.last2Stats().total | number }} งวด (±2σ)
               } @else {
@@ -39,7 +40,7 @@
               }
             </p>
           } @else {
-            <p class="text-[13px] text-ink-2">วางเมาส์บนช่อง หรือค้นหาเลข 2 หลัก เพื่อดูรายละเอียดของเลขนั้น</p>
+            <p class="text-[13px] text-ink-2">วางเมาส์บนช่อง หรือค้นหาเลข 2 หลักในช่องค้นหา เพื่อดูรายละเอียดของเลขนั้น</p>
           }
         </div>
 
@@ -47,11 +48,13 @@
           @for (f of pairFacts(); track f.k) {
             <div class="flex justify-between border-b border-hair py-2 text-[13px]">
               <dt class="text-ink-2">{{ f.k }}</dt>
-              <dd class="font-mono font-medium">{{ f.v }}</dd>
+              <dd class="font-medium">{{ f.v }}</dd>
             </div>
           }
         </dl>
-        <p class="text-xs text-muted">ค่าคาดต่อเลขต่ำ (~{{ data.last2Stats().expected | number: '1.1-1' }} ครั้ง) ความต่างระหว่างเลขส่วนใหญ่จึงเป็นความบังเอิญ ไม่ใช่แนวโน้ม</p>
+        <p class="text-xs text-ink-2">
+          ค่าคาดต่อเลขต่ำ (~{{ data.last2Stats().expected | number: '1.1-1' }} ครั้ง) ความต่างระหว่างเลขส่วนใหญ่จึงเป็นความบังเอิญ เลขที่เคยออกบ่อยไม่ได้มีโอกาสออกงวดหน้ามากกว่าเลขอื่น
+        </p>
       </div>
     </div>
   </section>
@@ -59,9 +62,8 @@
   <!-- ---------- เลขหน้า / เลขท้าย 3 ตัว ---------- -->
   <section class="panel flex flex-col gap-[18px]" aria-labelledby="l3-title">
     <div>
-      <p class="eyebrow">3 DIGITS · DIGIT × POSITION</p>
-      <h2 id="l3-title" class="text-xl font-semibold">เลขหน้า 3 ตัว และเลขท้าย 3 ตัว</h2>
-      <p class="mt-1 text-[13px] text-ink-2">แถว = เลข 0–9 · คอลัมน์ = หลักที่ 1–3 · 1,000 เลขมีข้อมูลน้อยเกินกว่าจะแสดงทีละเลข</p>
+      <h2 id="l3-title" class="text-base font-semibold">เลขหน้า 3 ตัว และเลขท้าย 3 ตัว แยกตามหลัก</h2>
+      <p class="mt-1 text-xs text-ink-2">แถว = เลข 0–9 · คอลัมน์ = หลักที่ 1–3 · 1,000 เลขมีข้อมูลน้อยเกินกว่าจะแสดงทีละเลข</p>
     </div>
 
     <div class="grid gap-4 md:grid-cols-2">
@@ -69,7 +71,7 @@
         <div class="flex flex-col gap-3 rounded-[10px] bg-raised p-4">
           <div class="flex flex-wrap items-baseline justify-between gap-2">
             <span class="text-sm font-semibold">{{ label[t.kind] }}</span>
-            <span class="font-mono text-[11px] text-muted">{{ t.sub }}</span>
+            <span class="text-[11px] text-muted">{{ t.sub }}</span>
           </div>
           <div class="grid grid-cols-[minmax(0,200px)_minmax(0,1fr)] gap-5">
             <app-heat-grid
@@ -81,11 +83,11 @@
             <div class="flex flex-col gap-1.5 text-xs" aria-live="polite">
               @if (hoveredTriple()?.kind === t.kind) {
                 <strong class="font-semibold text-ink">หลักที่ {{ hoveredTriple()!.cell.pos + 1 }} · เลข {{ hoveredTriple()!.cell.digit }}</strong>
-                <span class="font-mono text-ink-2">{{ hoveredTriple()!.cell.count }} ครั้ง · คาด {{ t.stats.expected | number: '1.1-1' }}</span>
+                <span class="text-ink-2">{{ hoveredTriple()!.cell.count }} ครั้ง · คาด {{ t.stats.expected | number: '1.1-1' }}</span>
                 <span class="font-mono text-ink-2">{{ hoveredTriple()!.cell.z >= 0 ? '+' : '' }}{{ hoveredTriple()!.cell.z | number: '1.1-1' }}σ</span>
               } @else {
-                <strong class="font-mono font-medium text-ink">เกิน ±2σ: {{ t.stats.beyond2 }} จาก 30 ช่อง</strong>
-                <span class="text-muted">สุ่มยุติธรรมคาด ~{{ beyond2Expected30 | number: '1.1-1' }} ช่อง</span>
+                <strong class="font-medium text-ink">เกิน ±2σ: {{ t.stats.beyond2 }} จาก 30 ช่อง</strong>
+                <span class="text-ink-2">สุ่มล้วนคาดไว้ ~{{ beyond2Expected30 | number: '1.1-1' }} ช่อง</span>
               }
             </div>
           </div>
@@ -93,21 +95,22 @@
       }
     </div>
 
-    <p class="flex items-center gap-2.5 rounded-lg bg-raised px-3.5 py-2.5 text-[13px] text-ink-2">
-      <span class="font-mono text-xs font-bold text-gold">i</span>
+    <p class="flex items-center gap-2.5 rounded-[10px] bg-raised px-3.5 py-2.5 text-xs text-ink-2">
+      <svg class="shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" />
+      </svg>
       ก่อน 1 ก.ย. 2558 ยังไม่มีเลขหน้า 3 ตัว และเลขท้าย 3 ตัวมี 4 รางวัลต่องวด ค่าที่คาดทุกตัวในหน้านี้คำนวณจากจำนวนเลขที่ออกจริงในช่วงที่เลือก
     </p>
   </section>
 
   <!-- ---------- ผลย้อนหลัง ---------- -->
   <section class="panel" aria-labelledby="rd-title">
-    <p class="eyebrow">RECENT DRAWS</p>
-    <h2 id="rd-title" class="mb-2.5 text-xl font-semibold">ผลย้อนหลัง</h2>
+    <h2 id="rd-title" class="mb-2.5 text-base font-semibold">ผลย้อนหลัง</h2>
 
     <div class="overflow-x-auto">
       <table class="w-full min-w-[620px] border-collapse text-left">
         <thead>
-          <tr class="border-b border-hair text-xs text-muted">
+          <tr class="border-b border-hair text-xs text-ink-2">
             <th scope="col" class="w-[24%] py-1.5 font-normal">งวด</th>
             <th scope="col" class="w-[28%] py-1.5 font-normal">เลขหน้า 3 ตัว</th>
             <th scope="col" class="w-[30%] py-1.5 font-normal">เลขท้าย 3 ตัว</th>
@@ -118,12 +121,11 @@
           @for (d of rows(); track d.date) {
             <tr class="border-b border-hair">
               <th scope="row" class="py-2.5 font-normal">
-                <span class="block text-[13px]">{{ thaiDate(d.date) }}</span>
-                <span class="block font-mono text-[11px] text-muted">{{ d.date }}</span>
+                <span class="text-[13px] text-ink-2">{{ thaiDate(d.date) }}</span>
               </th>
               <td class="py-2.5 font-mono text-base font-medium tracking-[0.08em] whitespace-pre">{{ d.special.front3.join('   ') || '—' }}</td>
               <td class="py-2.5 font-mono text-base font-medium tracking-[0.08em] whitespace-pre">{{ d.special.last3.join('   ') }}</td>
-              <td class="py-2.5 font-mono text-lg font-bold tracking-[0.08em] text-gold">{{ d.special.last2[0] }}</td>
+              <td class="py-2.5 font-mono text-lg font-bold tracking-[0.08em]">{{ d.special.last2[0] }}</td>
             </tr>
           }
         </tbody>
@@ -131,7 +133,7 @@
     </div>
 
     <div class="mt-3 flex flex-wrap items-center gap-4 text-[13px]">
-      <button type="button" class="cursor-pointer font-medium text-gold hover:underline" (click)="toggleExpanded()" [attr.aria-expanded]="expanded()">
+      <button type="button" class="cursor-pointer font-semibold text-ink-2 hover:text-ink" (click)="toggleExpanded()" [attr.aria-expanded]="expanded()">
         {{ expanded() ? 'ย่อรายการ' : 'ดูย้อนหลังทั้งหมด ' + (data.draws().length | number) + ' งวด →' }}
       </button>
       @if (expanded()) {
