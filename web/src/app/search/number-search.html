@@ -1,10 +1,16 @@
-<section class="panel flex h-full flex-col gap-3.5" id="search" aria-labelledby="search-title">
-  <div>
-    <p class="eyebrow">INSPECTOR</p>
-    <h2 id="search-title" class="text-xl font-semibold">ค้นหาเลขเพื่อดูสถิติ</h2>
+<section class="panel flex flex-col gap-4" id="search" aria-labelledby="search-title">
+  <h2 id="search-title" class="text-lg font-bold">ค้นหาเลขเพื่อดูสถิติ</h2>
+
+  <div class="segmented" role="radiogroup" aria-label="รูปแบบการค้นหา">
+    @for (m of modes(); track m.value) {
+      <label class="seg text-xs">
+        <input class="sr-only" type="radio" [value]="m.value" [formField]="searchForm.mode" />
+        {{ m.label }}
+      </label>
+    }
   </div>
 
-  <!-- Same shared field as the command bar; the slot layout just follows the search mode. -->
+  <!-- The slot layout follows the search mode (Figma "Spec · Search slots by mode"). -->
   <div class="flex min-h-[58px] items-center gap-2.5">
     <app-digit-slots
       size="lg"
@@ -18,81 +24,85 @@
       <button type="button" class="ml-auto cursor-pointer p-1 text-sm text-muted hover:text-ink" (click)="clear()" aria-label="ล้างคำค้น">✕</button>
     }
   </div>
-
-  <div class="flex flex-wrap gap-1" role="radiogroup" aria-label="รูปแบบการค้นหา">
-    @for (m of modes(); track m.value) {
-      <label class="pill text-[13px]">
-        <input class="sr-only" type="radio" [value]="m.value" [formField]="searchForm.mode" />
-        {{ m.label }}
-      </label>
-    }
-  </div>
-  <p id="search-hint" class="-mt-1.5 text-xs text-muted">{{ hint() }}</p>
+  <p id="search-hint" class="-mt-2 text-xs text-ink-2">{{ hint() }}</p>
 
   @if (error(); as e) {
     <p class="text-[13px] text-critical" role="alert">{{ e }}</p>
   } @else if (!query().text.trim()) {
-    <div>
-      <p class="mb-2.5 text-[13px] text-ink-2">กรอกเลขเพื่อดูว่าเคยออกในแต่ละรางวัลกี่ครั้ง เทียบกับจำนวนที่คาดถ้าสุ่มยุติธรรม</p>
-      <div class="flex gap-2">
+    <div class="flex flex-col gap-2.5">
+      <p class="text-[13px] text-ink-2">พิมพ์เลข 1–{{ digits() }} หลัก เพื่อดูว่าเคยออกกี่ครั้ง เทียบกับที่ควรเป็น</p>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs text-muted">ลอง</span>
         @for (e of examples(); track e.text) {
-          <button type="button" class="cursor-pointer rounded-full border border-hair bg-raised px-3 py-1.5 font-mono hover:border-gold" (click)="useExample(e)">
-            {{ e.text }}
+          <button type="button" class="cursor-pointer rounded-full border border-hair px-3 py-1.5 text-xs font-medium text-ink-2 hover:text-ink" (click)="useExample(e)">
+            {{ modeLabel(e.mode) }} <span class="font-mono font-semibold">{{ e.text }}</span>
           </button>
         }
       </div>
     </div>
   } @else {
-    <div class="flex gap-6">
-      @for (s of summary(); track s.label) {
-        <div class="flex flex-col">
-          <strong class="font-mono text-2xl font-bold" [class.text-gold]="s.gold">{{ s.value }}</strong>
-          <span class="text-xs text-muted">{{ s.label }}</span>
-        </div>
-      }
+    <div class="flex flex-col gap-1.5">
+      <dl class="grid grid-cols-3 rounded-[10px] border border-hair">
+        @for (s of summary(); track s.label) {
+          <div class="flex flex-col-reverse gap-0.5 border-l border-hair py-2.5 pl-3.5 first:border-l-0">
+            <dt class="text-xs text-ink-2">{{ s.label }}</dt>
+            <dd class="font-mono text-xl font-bold" [class]="s.gold ? 'text-gold' : ''">{{ s.value }}</dd>
+          </div>
+        }
+      </dl>
+      <p class="text-xs text-muted">นับจากช่วง: {{ rangeLabel() }} · {{ drawCount() | number }} งวด</p>
     </div>
 
-    <p class="text-xs text-ink-2">แยกตามรางวัล · แท่ง = พบ, ขีด = คาด</p>
-    <ul class="grid gap-3">
+    @if (!totalHits()) {
+      <p class="text-xs text-ink-2">
+        ไม่เคยออกในช่วงนี้ ซึ่งเป็นเรื่องปกติเมื่อค่าคาดต่ำ (คาดไว้ {{ totalExpected() | number: '1.0-2' }} ครั้ง) และไม่ได้ทำให้งวดหน้ามีโอกาสออกมากขึ้น
+      </p>
+    }
+
+    <div class="flex items-center justify-between">
+      <h3 class="text-[13px] font-semibold">{{ special() ? 'แยกตามประเภท' : 'แยกตามรางวัล' }}</h3>
+      <span class="flex items-center gap-1 text-[11px] text-ink-2"><span class="h-2.5 w-0.5 bg-ink" aria-hidden="true"></span>= ค่าคาด</span>
+    </div>
+    <ul class="grid gap-2.5">
       @for (s of stats(); track s.id) {
-        <li class="grid grid-cols-[92px_1fr_auto_auto] items-center gap-2.5 text-[13px]">
-          <span>{{ s.label }}</span>
-          <span class="relative h-2.5 rounded-[3px] bg-raised" role="img" [attr.aria-label]="s.label + ' พบ ' + s.hits + ' คาด ' + (s.expected | number: '1.0-1')">
-            <span class="absolute inset-y-0 left-0 rounded-[3px]" [class]="(s.ratio ?? 0) >= 1 ? 'bg-div-pos' : 'bg-div-neg'" [style.width.%]="s.barPct"></span>
+        <li class="grid grid-cols-[84px_1fr_auto] items-center gap-2.5 text-xs">
+          <span class="text-ink-2">{{ s.label }}</span>
+          <span class="relative h-2.5 rounded-[5px] bg-raised" role="img" [attr.aria-label]="s.label + ' พบ ' + s.hits + ' คาด ' + (s.expected | number: '1.0-1')">
+            <span class="absolute inset-y-0 left-0 rounded-[5px]" [class]="(s.ratio ?? 0) >= 1 ? 'bg-div-pos' : 'bg-div-neg'" [style.width.%]="s.barPct"></span>
             <span class="absolute -inset-y-[3px] -ml-px w-0.5 bg-ink" [style.left.%]="tickPct"></span>
           </span>
-          <span class="min-w-[3ch] text-right font-mono font-medium">{{ s.hits | number }}</span>
-          <span class="min-w-[6ch] font-mono text-xs text-muted">/{{ s.expected | number: '1.0-1' }}</span>
+          <span class="min-w-[13ch] text-right font-mono text-[11px] text-ink-2">
+            {{ s.hits | number }} / {{ s.expected | number: '1.0-1' }}
+            <span class="ml-1 inline-block min-w-[5ch] text-ink">{{ pct(s.ratio) }}</span>
+          </span>
         </li>
       }
     </ul>
     @if (lowExpected()) {
-      <p class="text-xs text-muted">รางวัลที่ค่าคาดต่ำกว่า ~5 ครั้ง ผลแกว่งจากความบังเอิญมาก อย่าเพิ่งสรุปจากตัวเลขนั้น</p>
+      <p class="text-xs text-ink-2">{{ special() ? 'ประเภท' : 'รางวัล' }}ที่คาดไว้ต่ำกว่า 5 ครั้ง ผลต่างแค่ไม่กี่ครั้งอาจเกิดจากความบังเอิญ อย่าเพิ่งสรุป</p>
     }
 
-    <hr class="my-1 border-hair" />
-    <h3 class="text-sm font-semibold">ออกล่าสุด</h3>
     @if (list().length) {
-      <ul class="-mt-1.5" [class]="expanded() ? 'max-h-[360px] overflow-auto' : ''">
+      <hr class="border-hair" />
+      <h3 class="text-[13px] font-semibold">ออกล่าสุด</h3>
+      <ul class="-mt-2" [class]="expanded() ? 'max-h-[360px] overflow-auto' : ''">
         @for (h of list(); track $index) {
-          <li class="flex items-baseline gap-3 border-b border-hair py-2">
-            <span class="font-mono text-xs text-muted">{{ h.date }}</span>
+          <li class="flex items-center gap-3 border-b border-hair py-2">
+            <span class="w-[76px] shrink-0 text-xs text-ink-2">{{ h.thaiDate }}</span>
             <span class="font-mono text-[15px] tracking-[0.06em] text-ink-2">
               @for (c of h.chars; track $index) {
                 <span [class]="c.hit ? 'font-bold text-gold' : ''">{{ c.ch }}</span>
               }
             </span>
-            <span class="ml-auto text-xs text-muted">{{ h.label }}</span>
+            <span class="ml-auto text-xs text-ink-2">{{ h.label }}</span>
           </li>
         }
       </ul>
       @if (canExpand()) {
-        <button type="button" class="cursor-pointer self-start text-[13px] font-medium text-gold hover:underline" (click)="expanded.set(!expanded())">
+        <button type="button" class="cursor-pointer self-start text-[13px] font-semibold text-gold hover:underline" (click)="expanded.set(!expanded())">
           {{ expanded() ? 'ย่อรายการ' : 'ดูทั้งหมด ' + (totalHits() | number) + ' รายการ →' }}
         </button>
       }
-    } @else {
-      <p class="text-xs text-muted">ไม่เคยออกในช่วงเวลาที่เลือก</p>
     }
   }
 </section>
