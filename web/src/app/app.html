@@ -93,9 +93,28 @@
     </header>
 
     @if (data.file.isLoading()) {
-      <p class="p-8 text-ink-2">กำลังโหลดข้อมูล…</p>
+      <!-- Skeleton in the page's own shape (no spinner): the layout doesn't jump when data lands. -->
+      <div class="flex animate-pulse flex-col gap-5 px-4 pt-6 sm:px-7" role="status" aria-label="กำลังโหลดข้อมูล">
+        <div class="h-7 w-2/3 max-w-[480px] rounded-lg bg-raised"></div>
+        <div class="h-[280px] rounded-[14px] bg-raised"></div>
+        <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+          <div class="h-24 rounded-xl bg-raised"></div>
+          <div class="h-24 rounded-xl bg-raised"></div>
+          <div class="h-24 rounded-xl bg-raised max-md:hidden"></div>
+        </div>
+      </div>
     } @else if (data.file.error()) {
-      <p class="p-8 text-critical">โหลด data/draws.json ไม่สำเร็จ ให้รัน <code>python scripts/export_web.py</code> ก่อน</p>
+      <div class="mx-4 mt-8 flex flex-col items-center gap-2 rounded-[14px] border border-hair bg-surface px-6 py-10 text-center sm:mx-7" role="alert">
+        <svg class="text-critical" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2.2-1.6M12 20h.01" />
+        </svg>
+        <p class="text-[15px] font-semibold">โหลดสถิติย้อนหลังไม่สำเร็จ</p>
+        <p class="text-xs text-ink-2">ตรวจการเชื่อมต่อแล้วลองอีกครั้ง</p>
+        <!-- httpResource.reload() re-runs the same GET; the @if above flips back to the skeleton -->
+        <button type="button" class="mt-1 cursor-pointer rounded-[9px] border border-hair bg-raised px-4 py-2 text-[13px] font-semibold hover:border-muted" (click)="data.file.reload()">
+          ลองใหม่
+        </button>
+      </div>
     } @else {
       <router-outlet />
     }
