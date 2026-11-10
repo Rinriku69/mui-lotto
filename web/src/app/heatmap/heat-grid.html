@@ -1,7 +1,7 @@
 @if (label()) {
   <div class="mb-2 flex items-baseline justify-between">
     <span class="text-[13px] font-semibold">{{ label() }}</span>
-    <span class="font-mono text-[11px] text-muted">{{ stats().total | number }}</span>
+    <span class="text-[11px] text-muted">{{ stats().total | number }} เลข</span>
   </div>
 }
 
@@ -25,7 +25,7 @@
         [class]="
           (cellHeight() ? '' : 'aspect-[11/10] ') +
           (c.strong ? 'text-white ' : 'text-ink-2 ') +
-          (active() === c.cell ? 'inset-ring-2 inset-ring-ink' : c.flagged ? 'inset-ring-[1.5px] inset-ring-gold' : '')
+          (active() === c.cell ? 'inset-ring-2 inset-ring-gold' : c.flagged ? 'inset-ring-[1.5px] inset-ring-ink' : '')
         "
         [style]="c.style"
         [attr.aria-label]="c.aria"

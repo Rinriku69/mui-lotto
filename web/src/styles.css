@@ -80,7 +80,7 @@
  * as real utilities, so they work with variants (hover:, md: ...) like any built-in class.
  */
 @utility panel {
-  @apply rounded-xl border border-hair bg-surface p-[22px];
+  @apply rounded-[14px] border border-hair bg-surface p-[22px];
 }
 
 @utility eyebrow {
