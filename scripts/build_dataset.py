@@ -55,6 +55,9 @@ CREATE TABLE special_prizes (
 GLO_DATE_ALIAS = {"2020-05-16": "2020-04-01", "2026-01-16": "2026-01-17"}
 # Draw dates stored in our dataset (the real date the numbers were drawn).
 REAL_DATE = {"2026-01-16": "2026-01-17"}
+# Draws GLO already published but the archive has not added yet (no file to take the date from).
+# Remove an entry once the archive catches up; the archive file then supplies the date as usual.
+GLO_ONLY_DATES = ["2026-11-16"]
 
 
 def fetch_glo(date_str: str) -> dict | None:
@@ -131,14 +134,20 @@ def main():
     rows, mismatches, problems = [], [], []
     special_rows, special_mismatches = [], []
 
-    for f in sorted(ARCHIVE.glob("*.txt")):
-        date_str = REAL_DATE.get(f.stem, f.stem)
-        payload = fetch_glo(GLO_DATE_ALIAS.get(f.stem, f.stem))
+    # dict as a lookup: draw date -> archive file, or None for GLO-only draws.
+    # Building it from two sources then sorting the keys keeps chronological order.
+    draw_files: dict[str, Path | None] = {f.stem: f for f in ARCHIVE.glob("*.txt")}
+    for d in GLO_ONLY_DATES:
+        draw_files.setdefault(d, None)  # setdefault: don't overwrite if the archive already has it
+
+    for stem, f in sorted(draw_files.items()):
+        date_str = REAL_DATE.get(stem, stem)
+        payload = fetch_glo(GLO_DATE_ALIAS.get(stem, stem))
         glo = parse_glo(payload)
-        arc = parse_archive(f)
+        arc = parse_archive(f) if f else {}
 
         # --- special prizes: same source rule (GLO first, archive fallback, cross-check) ---
-        sg, sa = parse_glo_special(payload), parse_archive_special(f)
+        sg, sa = parse_glo_special(payload), (parse_archive_special(f) if f else {})
         if sg and sa and sg != sa:
             special_mismatches.append(date_str)
         sp, ssrc = (sg, "glo") if sg else (sa, "archive")
