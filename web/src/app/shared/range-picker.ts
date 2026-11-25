@@ -25,7 +25,7 @@ import { thaiDate } from './thai-date';
       </div>
       @if (compact()) {
         <button type="button" [class]="calBtn" [attr.aria-pressed]="custom()" aria-label="กำหนดช่วงเอง" (click)="data.rangePreset.set('custom')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
           </svg>
         </button>
@@ -38,7 +38,7 @@ import { thaiDate } from './thai-date';
         [attr.aria-pressed]="custom()"
         (click)="data.rangePreset.set('custom')"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
         </svg>
         กำหนดช่วงเอง
@@ -50,7 +50,7 @@ import { thaiDate } from './thai-date';
         <label class="flex items-center gap-1.5">ถึง <input type="date" [formField]="data.rangeForm.to" /></label>
       </div>
     }
-    <p class="text-xs text-muted">{{ span() }} · {{ data.draws().length | number }} งวด</p>
+    <p class="text-xs text-muted">{{ span() }}, <span class="whitespace-nowrap">{{ data.draws().length | number }} งวด</span></p>
   `,
 })
 export class RangePicker {
@@ -71,5 +71,5 @@ export class RangePicker {
     return `${thaiDate(d[0]?.date)} – ${thaiDate(d.at(-1)?.date)}`;
   });
   protected readonly calBtn =
-    'grid size-[38px] shrink-0 cursor-pointer place-items-center rounded-[9px] border border-hair text-ink-2 hover:text-ink aria-pressed:bg-gold-soft aria-pressed:text-gold';
+    'grid size-10 shrink-0 cursor-pointer place-items-center rounded-[10px] border border-hair text-ink-2 hover:text-ink aria-pressed:bg-gold-soft aria-pressed:text-gold';
 }

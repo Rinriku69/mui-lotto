@@ -30,7 +30,7 @@ const isDigit = (c: string | undefined) => !!c && c >= '0' && c <= '9';
         @for (i of indexes(); track i) {
           <input
             #cell
-            [class]="box() + ' border-hair font-bold text-gold caret-transparent outline-none placeholder:font-normal placeholder:text-muted focus:border-gold focus:ring-2 focus:ring-gold/25'"
+            [class]="box() + ' border-hair font-semibold text-gold caret-transparent outline-none placeholder:font-normal placeholder:text-muted focus:border-gold focus:ring-2 focus:ring-gold/25'"
             inputmode="numeric"
             autocomplete="off"
             spellcheck="false"
@@ -57,7 +57,7 @@ const isDigit = (c: string | undefined) => !!c && c >= '0' && c <= '9';
         @for (b of flow().boxes; track $index) {
           <span
             aria-hidden="true"
-            [class]="box() + ' ' + (b ? 'border-hair font-bold text-gold' : $index === flow().caret ? 'border-hair text-muted group-has-focus:border-gold' : 'border-hair text-muted')"
+            [class]="box() + ' ' + (b ? 'border-hair font-semibold text-gold' : $index === flow().caret ? 'border-hair text-muted group-has-focus:border-gold' : 'border-hair text-muted')"
             >{{ b || '_' }}</span
           >
         }

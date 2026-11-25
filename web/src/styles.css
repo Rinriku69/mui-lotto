@@ -4,30 +4,31 @@
 @import '@fontsource-variable/jetbrains-mono';
 
 /*
- * Design tokens for "B · Night Desk" (mirrors the Figma variable collection of the same name).
+ * Design tokens for "B - Night Desk" (mirrors the Figma variable collection of the same name).
  * In Tailwind v4 the theme lives in CSS: every --color-* here becomes bg-*, text-*, border-*, ring-* ...
  * utilities (e.g. --color-gold -> bg-gold, text-gold), and the same names stay usable as
  * plain CSS variables (var(--color-gold)) for runtime values like heatmap cell colours.
- * These are the Dark values; the Light mode below overrides the same names (Figma: mode "Light").
+ * These are the Dark values (Figma: mode "Dark - Champagne", a warm graphite ramp with a pale
+ * champagne accent); the Light mode below overrides the same names (Figma: mode "Light").
  */
 @theme {
-  --color-page: #0d0e10;
-  --color-surface: #15171a;
-  --color-raised: #1d2024;
-  --color-ink: #edeef0;
-  --color-ink-2: #a9adb4;
-  /* Figma uses #6F747C; lifted slightly so small muted text clears 4.5:1 on surface */
-  --color-muted: #868b94;
-  --color-hair: #2a2d32;
-  --color-gold: #f2b544;
+  --color-page: #111110;
+  --color-surface: #181816;
+  --color-raised: #211f1c;
+  --color-ink: #eceae5;
+  --color-ink-2: #aba69d;
+  /* clears 4.5:1 on surface for small muted text */
+  --color-muted: #8c877e;
+  --color-hair: #2e2b27;
+  --color-gold: #e3cfa6;
   --color-on-gold: #17130a;
-  /* tinted ground behind the generator and the active nav item (Figma accent/soft) */
-  --color-gold-soft: #2a2519;
+  /* tinted ground behind the active nav item and selected cells (Figma accent/soft) */
+  --color-gold-soft: #262320;
   --color-critical: #e66767;
   /* diverging heatmap: blue (fewer than expected) <-> gray <-> red (more than expected) */
-  --color-div-neg: #3987e5;
-  --color-div-mid: #2c2f34;
-  --color-div-pos: #e05555;
+  --color-div-neg: #4a86d4;
+  --color-div-mid: #2a2825;
+  --color-div-pos: #d9584f;
 
   --font-sans: 'Anuphan Variable', system-ui, 'Leelawadee UI', sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Mono', monospace;
@@ -80,7 +81,7 @@
  * as real utilities, so they work with variants (hover:, md: ...) like any built-in class.
  */
 @utility panel {
-  @apply rounded-[14px] border border-hair bg-surface p-4 sm:p-[22px];
+  @apply rounded-[14px] border border-hair bg-surface p-4 sm:p-6;
 }
 
 @utility eyebrow {
@@ -105,7 +106,7 @@
  * `segmented` is the track, `seg` each option - a button with aria-pressed, or a label around a radio.
  */
 @utility segmented {
-  @apply flex gap-0.5 rounded-[9px] bg-raised p-[3px];
+  @apply flex gap-0.5 rounded-[10px] bg-raised p-[3px];
 }
 
 @utility seg {
@@ -116,7 +117,7 @@
 }
 
 @utility btn-gold {
-  @apply cursor-pointer rounded-lg bg-gold px-[22px] py-[11px] text-[15px] font-semibold text-on-gold hover:bg-[color-mix(in_oklch,var(--color-gold)_88%,white)] disabled:cursor-not-allowed disabled:opacity-40;
+  @apply cursor-pointer rounded-lg bg-gold px-6 py-3 text-[15px] font-semibold text-on-gold hover:bg-[color-mix(in_oklch,var(--color-gold)_88%,white)] disabled:cursor-not-allowed disabled:opacity-40;
 }
 
 /* Diverging legend: stops mirror zStrength(): z = -3,-2,-1,0,+1,+2,+3 -> strength 100/44/11/0 %. */

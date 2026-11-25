@@ -21,17 +21,17 @@ function iso(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-/** "งวดถัดไป 16 พ.ย. 2569 · อีก 7 วัน" - the date lottery buyers plan around. */
+/** "งวดถัดไป 16 พ.ย. 2569 อีก 7 วัน" - the date lottery buyers plan around. */
 @Component({
   selector: 'app-next-draw',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'inline-flex' },
   template: `
     <p
-      class="flex items-center gap-2 rounded-full border border-hair bg-surface py-2 pr-3.5 pl-3 text-[13px]"
+      class="flex items-center gap-2 rounded-[10px] border border-hair bg-surface px-3 py-2 text-[13px]"
       title="ตามกำหนดปกติวันที่ 1 และ 16 ของเดือน บางงวดเลื่อนตามวันหยุด"
     >
-      <svg class="text-gold" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg class="text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
       </svg>
       <span class="font-semibold">งวดถัดไป {{ date }}</span>

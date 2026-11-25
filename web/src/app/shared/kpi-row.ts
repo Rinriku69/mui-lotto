@@ -17,9 +17,9 @@ export interface Kpi {
   template: `
     <section class="grid grid-cols-2 gap-3 md:auto-cols-fr md:grid-flow-col" aria-label="สรุป">
       @for (k of kpis(); track k.label) {
-        <div class="flex min-w-0 flex-col gap-1 rounded-xl border border-hair bg-surface px-[18px] py-4">
+        <div class="flex min-w-0 flex-col gap-1 rounded-xl border border-hair bg-surface px-5 py-4">
           <span class="text-xs font-medium text-ink-2">{{ k.label }}</span>
-          <strong class="font-mono text-[26px] leading-tight font-bold whitespace-pre">{{ k.value }}</strong>
+          <strong class="font-mono text-[26px] leading-tight font-medium whitespace-pre">{{ k.value }}</strong>
           <span class="text-xs text-muted">{{ k.sub }}</span>
         </div>
       }
