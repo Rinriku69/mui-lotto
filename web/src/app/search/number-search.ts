@@ -51,7 +51,7 @@ const num = new Intl.NumberFormat('en-US');
 
 /**
  * The Thai label already names the mode, so the hint under the pills only shows an example
- * (repeating "เลขท้าย · ..." right under a "เลขท้าย" pill would say the same thing twice).
+ * (repeating "เลขท้าย: ..." right under a "เลขท้าย" pill would say the same thing twice).
  */
 const ALL_MODES: { value: SearchMode; label: string; main: string; special: string }[] = [
   { value: 'anywhere', label: 'ตรงไหนก็ได้', main: 'เช่น 59 → 159302, 845902', special: 'เช่น 61 → 612, 361, 61' },
@@ -102,7 +102,7 @@ export class NumberSearch {
   /** Number length this tab searches: 6-digit prizes, or the 3-digit specials (last2 fits inside). */
   readonly digits = computed(() => (this.special() ? 3 : 6));
 
-  /** How the slot boxes behave per search mode (see Figma "Spec · Search slots by mode"). */
+  /** How the slot boxes behave per search mode (see Figma "Spec - Search slots by mode"). */
   readonly slotMode = computed<SlotMode>(() => SLOT_MODE[this.query().mode]);
 
   readonly matcher = computed<Matcher | string | null>(() => {
@@ -157,7 +157,7 @@ export class NumberSearch {
   readonly summary = computed(() => [
     { label: 'ครั้งที่พบ', value: num.format(this.totalHits()), gold: true },
     { label: 'ครั้งที่คาด', value: this.totalExpected().toFixed(1), gold: false },
-    { label: 'พบ / คาด', value: this.totalHits() || this.totalExpected() >= 1 ? `${this.totalRatio().toFixed(2)}×` : '—', gold: false },
+    { label: 'พบ / คาด', value: this.totalHits() || this.totalExpected() >= 1 ? `${this.totalRatio().toFixed(2)}×` : '-', gold: false },
   ]);
 
   /** Which slice of history the numbers come from - the range control may be far away (mobile). */
@@ -170,7 +170,7 @@ export class NumberSearch {
 
   /** "+27%" / "−11%": the bar's direction in text too, so colour is never the only signal. */
   pct(ratio: number | null) {
-    if (ratio === null) return '—';
+    if (ratio === null) return '-';
     const p = Math.round((ratio - 1) * 100);
     return p > 0 ? `+${p}%` : p < 0 ? `−${-p}%` : '0%';
   }

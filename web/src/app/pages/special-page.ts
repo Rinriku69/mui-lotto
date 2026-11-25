@@ -31,9 +31,9 @@ export class SpecialPage {
     const s = last?.special;
     const l2 = this.data.last2Stats();
     return [
-      { label: 'เลขท้าย 2 ตัว · งวดล่าสุด', value: s?.last2[0] ?? '–', sub: `งวด ${thaiDate(last?.date)}` },
-      { label: 'เลขหน้า 3 ตัว · งวดล่าสุด', value: s?.front3.join('  ') || '–', sub: `${this.data.front3Draws()} งวดที่มีรางวัลนี้` },
-      { label: 'เลขท้าย 3 ตัว · งวดล่าสุด', value: s?.last3.join('  ') || '–', sub: `${this.data.draws().length} งวด · ${this.data.specialByKind().last3.length.toLocaleString('en-US')} เลข` },
+      { label: 'เลขท้าย 2 ตัว งวดล่าสุด', value: s?.last2[0] ?? '–', sub: `งวด ${thaiDate(last?.date)}` },
+      { label: 'เลขหน้า 3 ตัว งวดล่าสุด', value: s?.front3.join('  ') || '–', sub: `${this.data.front3Draws()} งวดที่มีรางวัลนี้` },
+      { label: 'เลขท้าย 3 ตัว งวดล่าสุด', value: s?.last3.join('  ') || '–', sub: `${this.data.draws().length} งวด, ${this.data.specialByKind().last3.length.toLocaleString('en-US')} เลข` },
       { label: 'ช่องที่เกิน ±2σ (00–99)', value: `${l2.beyond2} / 100`, sub: `สุ่มล้วนคาดไว้ ~${(100 * BEYOND2_SHARE).toFixed(1)} ช่อง` },
     ];
   });
@@ -68,11 +68,11 @@ export class SpecialPage {
         .slice(0, 4)
         .join(', ');
     return [
-      { k: 'ออกบ่อยที่สุด', v: `${names(max)} · ${max} ครั้ง` },
-      { k: 'ออกน้อยที่สุด', v: `${names(min)} · ${min} ครั้ง` },
+      { k: 'ออกบ่อยที่สุด', v: `${names(max)} (${max} ครั้ง)` },
+      { k: 'ออกน้อยที่สุด', v: `${names(min)} (${min} ครั้ง)` },
       // the band right under the extremes, so "most / least" never reads as hot / cold numbers
       { k: 'ช่วงปกติถ้าสุ่มล้วน', v: `${this.normalBand()} ครั้ง (คาด ${s.expected.toFixed(1)})` },
-      { k: 'ช่องที่เกิน ±2σ', v: `${s.beyond2} จาก 100 · คาด ~${(100 * BEYOND2_SHARE).toFixed(1)}` },
+      { k: 'ช่องที่เกิน ±2σ', v: `${s.beyond2} จาก 100 (คาด ~${(100 * BEYOND2_SHARE).toFixed(1)})` },
     ];
   });
 
@@ -81,12 +81,12 @@ export class SpecialPage {
     {
       kind: 'front3',
       stats: this.data.front3Stats(),
-      sub: `${this.data.specialByKind().front3.length.toLocaleString('en-US')} เลข · ${this.data.front3Draws()} งวด (ตั้งแต่ ก.ย. 2558)`,
+      sub: `${this.data.specialByKind().front3.length.toLocaleString('en-US')} เลข, ${this.data.front3Draws()} งวด (ตั้งแต่ ก.ย. 2558)`,
     },
     {
       kind: 'last3',
       stats: this.data.last3Stats(),
-      sub: `${this.data.specialByKind().last3.length.toLocaleString('en-US')} เลข · ${this.data.draws().length} งวด`,
+      sub: `${this.data.specialByKind().last3.length.toLocaleString('en-US')} เลข, ${this.data.draws().length} งวด`,
     },
   ]);
   protected readonly hoveredTriple = signal<{ kind: SpecialKind; cell: CellStat } | null>(null);

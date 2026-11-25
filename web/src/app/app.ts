@@ -28,8 +28,9 @@ export class App {
   ];
 
   protected readonly tabs = [
-    { path: '/', label: 'รางวัลที่ 1–5', exact: true },
-    { path: '/special', label: 'เลขหน้า / ท้าย', exact: false },
+    // icon: 'grid' = the digit x position heatmaps of the 6-digit prizes, 'hash' = the short front/last numbers.
+    { path: '/', label: 'รางวัลที่ 1–5', exact: true, icon: 'grid' },
+    { path: '/special', label: 'เลขหน้า / ท้าย', exact: false, icon: 'hash' },
   ];
 
   protected onKeydown(e: KeyboardEvent) {

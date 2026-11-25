@@ -32,15 +32,15 @@ export class NumberGenerator {
    * sees every class. No string sets the same property twice (e.g. two border colours).
    */
   protected readonly chip =
-    'inline-flex min-h-[34px] items-center gap-1.5 rounded-full border border-hair bg-surface py-1 pr-2 pl-3 text-[13px] font-medium';
+    'inline-flex min-h-[34px] items-center gap-1.5 rounded-full border border-hair bg-raised py-1 pr-2 pl-3 text-[13px] font-medium';
   protected readonly chipInput = 'rounded bg-transparent px-1 py-0.5 font-mono outline-none placeholder:text-muted';
   protected readonly chipSelect = 'cursor-pointer appearance-none rounded bg-raised px-2 py-0.5 outline-none';
   protected readonly stepBtn =
     'cursor-pointer px-3.5 font-mono text-lg text-ink-2 hover:text-ink disabled:cursor-not-allowed disabled:opacity-30';
   protected readonly rollBtn =
-    'flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-l-[10px] bg-gold px-5 py-3 text-base font-semibold whitespace-nowrap text-on-gold hover:bg-[color-mix(in_oklch,var(--color-gold)_88%,white)] disabled:cursor-not-allowed disabled:opacity-40';
+    'flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-l-[10px] bg-ink px-5 py-3 text-base font-semibold whitespace-nowrap text-page hover:bg-[color-mix(in_oklch,var(--color-ink)_88%,var(--color-page))] disabled:cursor-not-allowed disabled:opacity-40';
   protected readonly actionBtn =
-    'flex cursor-pointer items-center gap-1.5 rounded-lg border border-hair bg-surface px-3 py-1.5 text-[13px] font-medium text-ink-2 hover:text-ink';
+    'flex cursor-pointer items-center gap-1.5 rounded-lg border border-hair bg-raised px-3 py-1.5 text-[13px] font-medium text-ink-2 hover:text-ink';
   /** padding/background come from the caller (thumb-sized on mobile, compact on tickets) */
   protected readonly iconBtn = 'grid cursor-pointer place-items-center rounded-lg text-ink-2 hover:text-ink';
   protected readonly maxQuantity = MAX_QUANTITY;

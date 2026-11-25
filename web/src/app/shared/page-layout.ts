@@ -24,7 +24,7 @@ import { RangePicker } from './range-picker';
   template: `
     <header class="mx-auto flex max-w-[1600px] flex-col gap-x-6 gap-y-3 px-4 pt-5 sm:flex-row sm:flex-wrap sm:items-end sm:px-7 lg:pt-6">
       <div class="min-w-0 sm:flex-1">
-        <h1 class="text-xl font-bold text-ink sm:text-[26px] sm:leading-tight">{{ heading() }}</h1>
+        <h1 class="text-xl font-semibold text-ink sm:text-[26px] sm:leading-tight">{{ heading() }}</h1>
         <p class="mt-1 max-w-[80ch] text-sm text-ink-2">{{ lead() }}</p>
       </div>
       <app-next-draw />
